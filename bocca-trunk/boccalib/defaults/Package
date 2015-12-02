@@ -1,0 +1,6 @@
+; # this is the metadata for a package
+; # the package name is encoded in the filename.
+; # Package.sidlpkgname
+; # sidlpkgname may be dot-qualified.
+DefaultLanguage: @LANGUAGE@
+SidlFiles: @SIDLFILES@

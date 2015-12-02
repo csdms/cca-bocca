@@ -1,0 +1,43 @@
+13,15c13,14
+< pre-gencode-user:
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> pre-gencode-user: target_rule shared_rule
+> 	@echo "Class build hook $@: target"
+20,21c19
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"	
+---
+> 	@echo "Class build hook $@: target"
+26,27c24
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: target"
+31,32c28
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: target"
+36,37c32
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: target"
+41,42c36
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: target"
+46,47c40,46
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: target"
+> 
+> target_rule:
+> 	@echo "Inside target rule: $(CLASS_TARGET_VAR)"
+> 
+> shared_rule:
+> 	@echo "Inside shared rule (target): $(CLASS_SHARED_VAR)"

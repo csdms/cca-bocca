@@ -1,0 +1,4 @@
+# load the system defaults.
+. $CCT_LIB/defaults/vars.system
+# put all additions from user here.
+# varname=value (use sh syntax)

@@ -1,0 +1,100 @@
+#!/bin/bash
+#
+# this script destroys and regenerates the following directories
+# in the location where it is invoked (which must contain the
+# tex file given as an argument):
+# gen, scratch, tmp, unified. and that named by its input
+#
+
+# this should come from configure
+DOCDIR=`pwd`
+SCRATCHDIRS="scratch scratch/cxx scratch/f90 scratch/c scratch/java scratch/python"
+export DOCDIR
+export TMPDIR=$DOCDIR/tmp
+export GENDIR=$DOCDIR/gen
+export PATH=`pwd`/bin:$PATH
+
+
+if test $# -ne 1; then
+	echo "Expected the name of a tex file to process"
+	exit 1
+fi
+
+
+##################################################################################
+## verify the shell style and filters if any missing.
+if ! test -f "tobiShell.sty"; then
+	echo "Can't find tobiShell.sty. Get it and try again."
+	exit 1
+fi
+list="db-destyle-sidl-input  db-style-build-output  db-style-sidl-input  db-symbol-to-impl  db-symbol-to-sidl"
+for i in $list ; do
+if ! test -x "bin/$i"; then
+	echo "Can't find bin/$i. Get it and try again."
+	exit 1
+fi
+done
+##################################################################################
+
+# check input file
+# $1, if it exists, must be a dir.
+if test -f "$1"; then
+	echo "$0: expected unqualified name of a .tex file"
+	exit 1
+fi
+# $1.tex must exist.
+if ! test -f "$1.tex"; then
+	echo "$0: expected unqualified name of a .tex file"
+	exit 1
+fi
+
+# clean up and setup
+## BAM!!!
+/bin/rm -f -r scratch tmp gen unified $1
+if ! test "x$?" = "x0"; then
+	echo "$0: cannot clean old dirs"
+	exit 1
+fi
+
+mkdir $TMPDIR $GENDIR $SCRATCHDIRS unified
+if ! test "x$?" = "x0"; then
+	echo "$0: cannot create one of $TMPDIR $GENDIR $SCRATCHDIRS unified"
+	exit 1
+fi
+
+##################################################################################
+# build it all
+
+# generate all shell-based outputs/inputs
+latex -shell-escape $1
+if ! test "x$?" = "x0"; then
+	echo "$0: problem processing tex+shell"
+	exit 1
+fi
+
+# process without shell actions to build cross references
+latex $1
+if ! test "x$?" = "x0"; then
+	echo "$0: problem processing tex without shell"
+	exit 1
+fi
+
+# make pdf
+dvipdf $1
+if ! test "x$?" = "x0"; then
+	echo "$0: problem making pdf"
+fi
+
+# make html paged
+latex2html -show_section_numbers -bottom_navigation $1
+if ! test "x$?" = "x0"; then
+	echo "$0: problem making html"
+fi
+
+# make html single
+latex2html -split 0 -dir unified $1
+if ! test "x$?" = "x0"; then
+	echo "$0: problem making monolithic html"
+fi
+
+exit 0

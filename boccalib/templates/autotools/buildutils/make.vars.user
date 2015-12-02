@@ -1,0 +1,35 @@
+# This file contains user-specified component-specific variables. 
+# These will be applied when building the impl and skeleton code,
+# as appropriate.
+# Only set those which are necessary for your component.
+# The normal way to set/reset these variables is using the
+# bocca config CLASSNAME --var=VARUSER --value=VALUE
+# --------------------------------------------------------------
+# Include path directives, including paths to Fortran modules
+INCLUDES = 
+
+# Library paths and names, binaries
+LIBS = 
+
+# java 
+CLASSPATH_USER=
+# python
+PYTHONPATH_USER=
+
+# Optional additional compiler flags (Note: many compiler flags are only weakly portable)
+# Removing $(BOCCA_IO_FLAGS) from the build options will turn off all 
+# bocca-generated print statements for c, c++, and f90 preprocessor.
+# It may reduce the precision of errs reported in exception messages for c++.
+
+# f90 preprocessor
+FPPFLAGS_USER= $(BOCCA_IO_FLAGS)
+
+# compiler flags
+CFLAGS_USER=   $(BOCCA_IO_FLAGS)
+CXXFLAGS_USER= $(BOCCA_IO_FLAGS)
+F90FLAGS_USER=
+F77FLAGS_USER=
+JAVAFLAGS_USER=
+
+# Additional phony targets defined by users (the initial targets in make.rules.user are already included)
+USER_PHONY = 

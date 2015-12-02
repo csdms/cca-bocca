@@ -1,0 +1,17 @@
+package arrayOps version 1.0 {
+   
+   class F90ArrayOp implements-all arrayop.LinearOp,
+                                   gov.cca.Component,
+                                   gov.cca.ComponentRelease
+   {} 
+   
+   class F77ArrayOp implements-all arrayop.LinearOp,
+                                   gov.cca.Component,
+                                   gov.cca.ComponentRelease
+   {}
+   
+   class CArrayOp implements-all arrayop.LinearOp,
+                                   gov.cca.Component,
+                                   gov.cca.ComponentRelease
+   {}
+}   

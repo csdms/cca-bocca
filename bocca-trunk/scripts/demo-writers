@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+""" demo-writers, a tester of the writers
+   Author: Benjamin Allan
+   Org:	Sandia National Laboratories, Livermore
+   Date: 7/2007.
+   License: GPLv2. Of course this doesn't affect the files that
+	are processed by this utility.
+"""
+import sys
+import os.path
+import shutil
+import writers.cxxWriter
+import writers.cWriter
+import writers.f77Writer
+import writers.f90Writer
+import writers.pythonWriter
+import writers.javaWriter
+from cct._portInstance import PortInstance
+
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def testSourceWriter(writer):
+    sym="foo.bar"
+    pi1 = PortInstance( "gov.cca.ports.GoPort","run", '%local%')
+    pi2 = PortInstance( "myproj.IntegratorPort" ,"PPort" , '%local%')
+    provides=[pi1,pi2]
+    ui1= PortInstance("foo.MeshPort","mymesh", '%local%')
+    ui2= PortInstance("myproj.IntegratorPort", "integrator" ,'%local%' )
+    uses=[ ui1, ui2]
+    print "-------------------------------------------------------------------"
+    print "Testing writer for language = " + writer.language
+    print "getImplHeaderCode: ------------------------------------------------"
+    print writer.getImplHeaderCode(sym)
+    print "getHeaderCode: ----------------------------------------------------"
+    print writer.getHeaderCode(sym)
+
+    print "getConstructorCode: -----------------------------------------------"
+    print writer.getConstructorCode(sym)
+    print "getDestructorCode: ------------------------------------------------"
+    print writer.getDestructorCode(sym)
+
+    print "getSetServicesCode: -----------------------------------------------"
+    print writer.getSetServicesCode(sym)
+    print "getAuxiliarySetServicesMethod: ------------------------------------"
+    print writer.getAuxiliarySetServicesMethod(sym, provides, uses)
+    print "getAuxiliarySetServicesMethod(empty lists): -----------------------"
+    print writer.getAuxiliarySetServicesMethod(sym)
+
+    print "getReleaseMethod: -------------------------------------------------"
+    print writer.getReleaseMethod(sym)
+    print "getAuxiliaryReleaseServicesMethod: --------------------------------"
+    print writer.getAuxiliaryReleaseServicesMethod(sym, provides, uses)
+    print "getAuxiliaryReleaseServicesMethod(empty lists): -----------------------"
+    print writer.getAuxiliaryReleaseServicesMethod(sym)
+
+    print "getGoCode: --------------------------------------------------------"
+    print writer.getGoCode(sym, uses)
+    print "getGoPrologCode: --------------------------------------------------"
+    print writer.getGoPrologCode(sym, uses)
+    print "getGoEpilogCode: --------------------------------------------------"
+    print writer.getGoEpilogCode(sym, uses)
+    print "getGoPrologCode(empty list): --------------------------------------"
+    print writer.getGoPrologCode(sym)
+    print "getGoEpilogCode(empty list): --------------------------------------"
+    print writer.getGoEpilogCode(sym)
+    print "-------------------------------------------------------------------"
+
+def main(argv=None):
+
+  if not argv:
+    argv=sys.argv
+  if len(argv) < 2:
+    print "Need a language argument"
+    return 1
+  list =["cxx","java","python","c","f77","f90"]
+  if not argv[1] in list:
+    print "Need a language argument in", list
+    return 1
+
+  print " Test drive "+argv[1]
+
+  if argv[1] == "python":
+    try:
+      writer = writers.pythonWriter.PythonWriter()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+  if argv[1] == "java":
+    try:
+      writer = writers.javaWriter.JavaWriter()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+  if argv[1] == "cxx":
+    try:
+      writer = writers.cxxWriter.CxxWriter()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+  if argv[1] == "c":
+    try:
+      writer = writers.cWriter.CWriter()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+  if argv[1] == "f77":
+    try:
+      writer = writers.f77Writer.F77Writer()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+  if argv[1] == "f90":
+    try:
+      writer = writers.f90Writer.F90Writer()
+      testSourceWriter(writer)
+    except Exception, e:
+      print  >> sys.stderr, "problem with python: " + str(e)
+
+if __name__ == "__main__":
+    sys.exit(main())

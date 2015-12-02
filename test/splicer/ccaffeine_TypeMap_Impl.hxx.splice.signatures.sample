@@ -1,0 +1,41 @@
+// DO-NOT-DELETE splicer.begin(ccaffeine.TypeMap._includes)
+// #include <map>
+// #include <utility> // need pair<T,U>
+#include "dc/export/AllExport.hh"
+#include "ccaffeine_CCAException.hxx"
+/*
+ * The implementation here is now that of the pure c++ version
+ * done by ben allan, wrapped in babel.
+ * It doesn't make evil assumptions about underlying
+ * implementations of the sort that require reinterpret cast.
+ * 
+ */
+// DO-NOT-DELETE splicer.end(ccaffeine.TypeMap._includes)
+////////////////////////////////////////////////////////////////////////
+  class TypeMap_impl : public virtual ::ccaffeine::TypeMap 
+  // DO-NOT-DELETE splicer.begin(ccaffeine.TypeMap._inherits)
+  // Put additional inheritance here...
+  // DO-NOT-DELETE splicer.end(ccaffeine.TypeMap._inherits)
+////////////////////////////////////////////////////////////////////////
+    // DO-NOT-DELETE splicer.begin(ccaffeine.TypeMap._implementation)
+    ::ccafeopq::TypeMap_shared ctm;
+
+    template <class Scalar > sidl::array< Scalar > 
+      convertToSidlArray( ::std::vector< Scalar > & val );
+
+    template <class Scalar > ::std::vector< Scalar > 
+      convertToVector( sidl::array< Scalar > & val );
+
+    int serial;
+    static int nextNum() { genSerial++; return genSerial; }
+    static int genSerial;
+
+  public:
+
+    static ::ccaffeine::TypeMap babelWrap( ::ccafeopq::TypeMap_shared ctm_);
+    
+    // DO-NOT-DELETE splicer.end(ccaffeine.TypeMap._implementation)
+////////////////////////////////////////////////////////////////////////
+// DO-NOT-DELETE splicer.begin(ccaffeine.TypeMap._misc)
+// Put miscellaneous things here...
+// DO-NOT-DELETE splicer.end(ccaffeine.TypeMap._misc)

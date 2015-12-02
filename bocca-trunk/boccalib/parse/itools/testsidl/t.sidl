@@ -1,0 +1,99 @@
+/** The generic domain gov, which CCA claims to be a direct descendant of
+since more than just Department of Energy folks defined the specification. */
+
+package ggov version 1.0 {
+
+    /** 
+     *  This is an interface presented by a CCA-compliant framework to access its 
+     *  application framing capabilities. Most of the manipulation of the 
+     *  underlying framework is expected to be be done with the 
+     *  gov.cca.BuilderService Port. This class exists as a sort of bootstrap 
+     *  to get a Services object necessary to retrieve Port's, including 
+     *  BuilderService, from the underlying framework. How the interface and 
+     *  the underlying framework is created is entirely unspecified and is up 
+     *  to the devices of the programmer and the framework provider.
+     *
+     *  <p>Example</p>
+     *  <p>
+     *  Here it is assumed that an instance of AbstractFramework
+     *  is created in the main() from some hypothetical implementation.
+     *  The idea is to allow a complete swap of framework choice by 
+     *  changing out the specified implementation class of a framework.
+     *  </p>
+     *
+     *  <code><pre>
+     *  // java
+     *  main() {
+     *    cca.reference.Framework fwkimpl = new cca.reference.Framework();
+     *    // change fwkimpl above to use different cca implementations when
+     *    // AbstractFramework becomes part of the standard.
+     *    gov.cca.AbstractFramework fwk = (gov.cca.AbstractFramework)fwkimpl;
+     *    gov.cca.Services svc = 
+     *	   fwk.getServices("instance0","AppDriver",null);
+     *    // From here on, access all services, components, etc
+     *    // through svc.
+     *    ...
+     *    // when done
+     *    fwk.releaseServices(svc);
+     *    fwk.shutdownFramework();
+     *  }
+     *
+     *  // c++
+     *  int functionName() {
+     *    ::gov::sandia::ccafe::Framework fwkimpl;
+     *    ::gov::cca::AbstractFrameworkPtr fwk;
+     *
+     *    fwk = fwkimpl.getStandardFramework();
+     *    ::gov::cca::Services_Interface * svc = 0;
+     *    svc = fwk->getServices("instance0","AppDriver",0);
+     *    // From here on, access all services, components, etc
+     *    // through svc.
+     *    ...
+     *    // when done
+     *    fwk->releaseServices(svc);
+     *    svc = 0;
+     *    fwk->shutdownFramework();
+     *
+     *    // at scope exit, all memory is automatically cleaned up.
+     *  }
+     *  </pre></code>
+     */
+    interface AbstractFramework {
+    }
+    
+	interface myInt {
+      void packBoolArray( in string key, in array<bool> value, 
+                          in int ordering, in int dimen, 
+                          in bool reuse_array );
+      void packCharArray( in string key, in array<char> value,
+                          in int ordering, in int dimen, 
+                          in bool reuse_array );
+      void packIntArray( in string key, in array<int> value,
+                         in int ordering, in int dimen, 
+                         in bool reuse_array );
+      void packLongArray( in string key, in array<long> value,
+                          in int ordering, in int dimen,
+                          in bool reuse_array );
+      void packOpaqueArray( in string key, in array<opaque> value,
+                            in int ordering, in int dimen, 
+                            in bool reuse_array );
+      void packFloatArray( in string key, in array<float> value, 
+                           in int ordering, in int dimen, 
+                           in bool reuse_array );
+      void packDoubleArray( in string key, in array<double> value,
+                            in int ordering, in int dimen,
+                            in bool reuse_array );
+      void packFcomplexArray( in string key, in array<fcomplex> value,
+                              in int ordering, in int dimen, 
+                              in bool reuse_array );
+      void packDcomplexArray( in string key, in array<dcomplex> value,
+                              in int ordering, in int dimen, 
+                              in bool reuse_array );
+      void packStringArray( in string key, in array<string> value, 
+                            in int ordering, in int dimen, 
+                            in bool reuse_array );
+      void packGenericArray( in string key, in array<> value,
+                             in bool reuse_array );
+
+}
+}

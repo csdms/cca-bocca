@@ -1,0 +1,79 @@
+#!/bin/sh
+# @configure_input@
+#
+# a script to query about variables used in ccafe 
+# compile and install.
+# By Ben Allan (baallan@ca.sandia.gov) 3/26/2003
+#
+# @PACKAGE_NAME@-config  [--dump] [--varlist] [--var NAME] [--version]
+#  --dump : produce the complete sh-compatible var assignments.
+#  --varlist: produce the list of variable names.
+#  --var NAME: produce the value of the NAMEd variable, if defined.
+#  --version: tell about this script, not the package..
+
+Usage=" $0 [--dump] [--varlist] [--var NAME] [--version]"
+#
+# construct the location of the input vars
+# based on data from configure
+#
+exec_prefix='@exec_prefix@'
+prefix='@prefix@'
+bindir='@bindir@'
+libdir='@libdir@'
+sbindir='@sbindir@'
+libexecdir='@libexecdir@'
+datarootdir='@datarootdir@'
+datadir='@datadir@'
+
+VERSION=@PACKAGE_VERSION@
+version=0.2
+varfile='@PROJECT_NAME@.config-data'
+insdir=$prefix/lib
+insfile=$insdir/$varfile
+
+if test -z "$1" ; then
+  echo $Usage
+  exit 0
+fi
+if test "$1" = "--help"; then
+  echo $Usage
+  exit 0
+fi
+if test "$1" = "-h"; then
+  echo $Usage
+  exit 0
+fi
+if test "$1" = "--dump" -o "$1" = "--dump-vars" ; then
+  cat $insfile |grep -v '^#'
+  exit 0
+fi
+if test "$1" = "--varlist"; then
+  cat $insfile |grep -v '^#' | sed -e 's;=.*;;'
+  exit 0
+fi
+#
+# delete the var requested if inherited from the
+# callers environment.
+#
+if test "$1" = "--var"; then
+        unset $2
+fi
+
+#
+# read our config vars
+#
+. $insfile
+
+#
+# tell something about them
+#
+if test "$1" = "--var"; then
+  s="\${$2:?Not_A_CCAFE_Config_Variable}"
+  s2=`echo $s`
+  config_tmp_val=`eval echo $s2`
+  echo $config_tmp_val
+fi
+
+exit 0
+
+

@@ -1,0 +1,7 @@
+The parser is configured in iparse.py, in the setup method. To regenerate the parser tables, 
+simply parse a file and specify the --regen option at the end of the command line, e.g., in
+the testsidl subdirectory:
+
+	../iparse.py t.sidl --regen
+
+This will create the parsetab.py file and related tables in the correct directory (itools).

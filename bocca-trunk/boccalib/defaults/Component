@@ -1,0 +1,12 @@
+; # this is a template cca component metadata file.
+; # there is no Name stored as it is encoded in the filename
+; # Component.fullsidlclassname
+Alias: @ALIAS@ ; # user defined alias for class presentation
+Summary: @SUMMARY@ ; # short doc string
+Language: @LANGUAGE@ ; # implementation of this class
+SidlFiles: @SIDLPATH@ ; # where we keep the sidl description. normally .
+Provides: @PROVIDES@ ; # list of instance names of provided ports.
+Uses: @USES@ ; # list of instance names of used ports.
+
+[Properties]
+maxInstances: [Type=Int] 0 ; # 0=unlimited

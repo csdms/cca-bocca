@@ -1,0 +1,215 @@
+
+# most of this file is not expected to work-- legacy reminders to port.
+DO=../../install/bin/resplice
+BIN=../../install/bin
+srcdir=.
+
+PYTHONPATH=/home/local/cca/build/bocca/trunk/boccapy/install/lib/python2.5/site-packages
+check: all-check
+
+
+new-demo: new1 new2 new3 new4
+
+help:
+	(export PYTHONPATH=$(PYTHONPATH); $(BIN)/merge --help)
+
+# rob mode
+new1:
+	-$(RM) ccafe1_StarterComponent_Impl.cxx
+	@cp $(srcdir)/impls1.0.0/ccafe1_StarterComponent_Impl.cxx .
+	-@cp $(srcdir)/ccafe1.StarterComponent.setServices.gen .
+	(export PYTHONPATH=$(PYTHONPATH); $(BIN)/merge --nowarn --to ccafe1_StarterComponent_Impl.cxx --from ccafe1.StarterComponent.setServices.gen )
+	@diff --brief ccafe1_StarterComponent_Impl.cxx $(srcdir)/ccafe1_StarterComponent_Impl.cxx.overwrite.sample
+	
+# nesting mode
+new2:
+	-$(RM) ccafe1_StarterComponent_Impl.cxx
+	@cp $(srcdir)/impls1.0.0/ccafe1_StarterComponent_Impl.cxx .
+	(export PYTHONPATH=$(PYTHONPATH); $(BIN)/merge \
+	--nowarn -B 'DO-NOT-EDIT bocca.splicer' \
+	--to ccafe1_StarterComponent_Impl.cxx \
+	--from $(srcdir)/ccafe1_StarterComponent_Impl.setServices.input)
+	@diff --brief ccafe1_StarterComponent_Impl.cxx $(srcdir)/ccafe1_StarterComponent_Impl.cxx.insert.sample
+	
+old-check: all-demo all-e all-s
+	@echo "All Tests Completed"
+
+old-demo: demo1 demo2
+
+# this is an overwrite run with block files. we probably don't want to do this.
+demo1:
+	-$(RM) ccafe1_StarterComponent_Impl.cxx
+	-@cp $(srcdir)/ccafe1.StarterComponent.setServices.gen .
+	(export PYTHONPATH=$(PYTHONPATH); $(DO) -d -v  -l cxx --nowarn -2='DO-NOT-DELETE splicer' \
+		-s .gen --vpath $(srcdir)/impls1.0.0 \
+		ccafe1_StarterComponent_Impl.cxx )
+	@diff ccafe1_StarterComponent_Impl.cxx $(srcdir)/ccafe1_StarterComponent_Impl.cxx.overwrite.sample
+
+# this is an insert run reading from impls and a splice file
+demo2:
+	-$(RM) ccafe1_StarterComponent_Impl.cxx
+	$(DO)   -nowarn -lcxx --vpath $(srcdir)/impls1.0.0 \
+		-1='DO-NOT-DELETE splicer' -2='DO-NOT-EDIT gensvc' \
+		ccafe1_StarterComponent_Impl.cxx \
+		$(srcdir)/ccafe1_StarterComponent_Impl.setServices.input
+	@diff ccafe1_StarterComponent_Impl.cxx $(srcdir)/ccafe1_StarterComponent_Impl.cxx.insert.sample
+
+all-s:
+	@for i in 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do \
+		echo "########## Test s$$i ##########################"; \
+		$(MAKE) $(MAKEFLAGS) s$$i; \
+		echo "########## Finished s$$i ######################"; \
+	done
+
+all-e:	
+	@for i in 1 2 3 4; do \
+		echo "########## Test e$$i ##########################"; \
+		$(MAKE) $(MAKEFLAGS) e$$i; \
+		echo "########## Finished e$$i ######################"; \
+	done
+
+# test multifile extract. remainder of tests will use onefile for ease of diff.
+e1:
+	-@$(RM) -r extract-cxx extract-hxx
+	tar xf $(srcdir)/extract.tar
+	mkdir extract-cxx extract-hxx
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 -o extract-cxx \
+		ccaffeine_TypeMap_Impl.cxx 
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 -o extract-hxx \
+		ccaffeine_TypeMap_Impl.hxx
+	@diff -r extract-cxx $(srcdir)/extract-cxx.sample > e1cxx.diff
+	@diff -r extract-hxx $(srcdir)/extract-hxx.sample > e1hxx.diff
+		
+# onefile
+e2:
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 --one-file \
+		ccaffeine_TypeMap_Impl.cxx
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 --one-file \
+		ccaffeine_TypeMap_Impl.hxx
+	@diff ccaffeine_TypeMap_Impl.cxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.cxx.splice.sample > e2cxx.diff
+	@diff ccaffeine_TypeMap_Impl.hxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.hxx.splice.sample > e2hxx.diff
+
+# test signatures option
+e3:
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 --one-file \
+		--signatures ccaffeine_TypeMap_Impl.cxx
+	$(DO) --extract-splices --vpath $(srcdir)/impls1.0.0 --one-file \
+		--signatures ccaffeine_TypeMap_Impl.hxx
+	@diff ccaffeine_TypeMap_Impl.cxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.cxx.splice.signatures.sample > e3cxx.diff
+	@diff ccaffeine_TypeMap_Impl.hxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.hxx.splice.signatures.sample > e3hxx.diff
+
+# onefile match
+e4:
+	$(DO) --extract-splices --match misc --vpath $(srcdir)/impls1.0.0 --one-file \
+		ccaffeine_TypeMap_Impl.cxx
+	$(DO) --extract-splices --match misc --vpath $(srcdir)/impls1.0.0 --one-file \
+		ccaffeine_TypeMap_Impl.hxx
+	@diff ccaffeine_TypeMap_Impl.cxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.cxx.splice.misc.sample > e4cxx.diff
+	@diff ccaffeine_TypeMap_Impl.hxx.splice $(srcdir)/ccaffeine_TypeMap_Impl.hxx.splice.misc.sample > e4hxx.diff
+
+
+# test key specification, lang end comment, splices input, splicing
+s1:
+	cp $(srcdir)/source1.input source1.out
+	$(DO) -l c -1 '/* DO-NOT-DELETE outer' -2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' source1.out $(srcdir)/splices1
+	@diff source1.out $(srcdir)/source1.test
+
+# test common suppression
+s2:
+	cp $(srcdir)/source1.input source1.out
+	$(DO) -nocommon -l c -1 '/* DO-NOT-DELETE outer' -2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' source1.out $(srcdir)/splices1
+	@diff source1.out $(srcdir)/source1.test
+
+# test = splitting, debug flag
+s3:
+	cp $(srcdir)/source1.input source1.out
+	$(DO) -d -nocommon -l=c -1='/* DO-NOT-DELETE outer' -2='/* DO-NOT-REWRITE-MACHINE-GENERATED inner' source1.out $(srcdir)/splices1
+	@diff source1.out $(srcdir)/source1.test
+
+# test C defaults
+s4:
+	cp $(srcdir)/source2.input source2.out
+	$(DO) -l c source2.out $(srcdir)/splices2
+	@diff source2.out $(srcdir)/source2.test
+
+# test no blocks or splices (pass doing little)
+s5:
+	cp $(srcdir)/source2.input source2.out
+	$(DO) -l c source2.out
+	@diff source2.out $(srcdir)/source2.input
+
+# test no blocks or splices strict (should fail)
+s6:
+	cp $(srcdir)/source2.input source2.out
+	-$(DO) -fatal -l c source2.out
+	@diff source2.out $(srcdir)/source2.input
+
+# test dryrun
+s7:
+	cp $(srcdir)/source2.input source2.out
+	-$(DO) -dryrun -l c source2.out $(srcdir)/splices2
+	@diff source2.out $(srcdir)/source2.input
+
+# test no blocks or splices strict (should fail on common)
+s8:
+	cp $(srcdir)/source2.input source2.out
+	-$(DO) -fatal -l c source2.out $(srcdir)/splices2
+	@diff source2.out $(srcdir)/source2.input
+
+# test no blocks or splices strict (should pass on common, fail on s3)
+s9:
+	cp $(srcdir)/source2.input source2.out
+	-$(DO) -nocommon -fatal -l c source2.out $(srcdir)/splices2
+	@diff source2.out $(srcdir)/source2.input
+
+# test reset
+s10:
+	cp $(srcdir)/source2.input source2.out
+	$(DO) -d -i RESET -i ../test -l c source2.out $(srcdir)/splices2
+	@diff source2.out $(srcdir)/source2.test
+
+# test block input
+s11:
+	cp $(srcdir)/source1.input source1.out
+	$(DO) -nocommon -l c  -i $(srcdir)/blocks -s NONE \
+		-1 '/* DO-NOT-DELETE outer' \
+		-2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' \
+		source1.out
+	@diff source1.out $(srcdir)/source1.test
+
+# test bad input (nonexistent file) fail
+s12:
+	-$(DO) -l c  -i blocks -s NONE \
+		-1 '/* DO-NOT-DELETE outer' \
+		-2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' \
+		fred
+	-@$(RM) fred
+
+# test vpath
+s13:
+	$(RM) source1.out
+	-@mkdir tmp
+	cp $(srcdir)/source1.input tmp/source1.out
+	$(DO) -nocommon -l c  -i $(srcdir)/blocks -s NONE \
+		-1 '/* DO-NOT-DELETE outer' \
+		-2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' \
+		--vpath tmp source1.out
+	@diff source1.out $(srcdir)/source1.test
+
+# test norejects
+s14:
+	cp $(srcdir)/source1.input source1.out
+	-@$(RM) source1.out.rej
+	$(DO) --norejects -l c -1 '/* DO-NOT-DELETE outer' -2 '/* DO-NOT-REWRITE-MACHINE-GENERATED inner' source1.out $(srcdir)/splices1
+	@diff source1.out $(srcdir)/source1.test
+	@if test -f source1.out.rej; then \
+		echo "FAIL --norejects test"; \
+		echo "FAIL --norejects test"; \
+		echo "FAIL --norejects test"; \
+		echo "FAIL --norejects test"; \
+		echo "FAIL --norejects test"; \
+	fi
+
+
+clean:
+	$(RM) -r *.o *.out tmp extract-cxx* extract-hxx* *.diff *.splice *.rej fred ccafe1_StarterComponent_Impl.cxx

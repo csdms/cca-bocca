@@ -1,0 +1,27 @@
+Example setup for CC testing
+----------------------------
+
+This directory has example configuration that is being used to test at ANL with
+CruiseControl-2.7. 
+
+The following directories should be created in a top-level testing subdirectory:
+ 
+artifacts/bocca/
+checkout/bocca/       this is where  a copy of bocca should be checked out from svn
+logs/bocca
+
+The following files control the test process:
+
+bocca-cruisecontrol.xml   	bocca project configuration
+config.xml			CC configuration (can handle multiple projects if desired)
+
+Starting up CruiseControl can be done with:
+
+./cruisecontrol.sh 
+
+in the top-level testing directory (the one containing config.xml). Note that the CCDIR 
+env. variable must be set to point to the top-level CruiseControl directory -- make sure you 
+download and build the source distribution, not the binary one.
+
+More detailed instructions on setting up and using CC can be found 
+at https://trac.mcs.anl.gov/projects/ADIC/wiki/ADIC/SettingUpCruiseControl.

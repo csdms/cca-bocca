@@ -1,0 +1,15 @@
+  public void setServices_Impl (
+    /*in*/ gov.cca.Services services ) 
+    throws gov.cca.CCAException.Wrapper, 
+    sidl.RuntimeException.Wrapper
+  {
+  // DO-NOT-DELETE splicer.begin(myproj.Driver.setServices)
+  // bocca-default-code. User may edit or delete.begin(myproj.Driver.setServices)
+
+     boccaSetServices(services); 
+  
+  // Insert-Code-Here {myproj.Driver.setServices} (setServices method)
+
+  // bocca-default-code. User may edit or delete.end(myproj.Driver.setServices)
+  // DO-NOT-DELETE splicer.end(myproj.Driver.setServices)
+  }

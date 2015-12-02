@@ -1,0 +1,41 @@
+package SynergiaCCA version 0.1 {
+
+  class BeamBunchComp implements-all advaccelsims.ParticleStore,
+    gov.cca.Component
+  {
+  }
+
+  class MacroBeamBunchComp implements-all advaccelsims.ParticleStore,
+    gov.cca.Component
+  {
+  }
+
+
+  class FastMappingComp implements-all advaccelsims.Mapper,
+    gov.cca.Component
+  {
+  }
+
+  class MLIMapperComp implements-all advaccelsims.Mapper,
+    gov.cca.Component
+  {
+  }
+
+  class DriverComp implements-all gov.cca.Component, gov.cca.ports.GoPort
+  {
+  }
+
+  class Syn2ProtoDriverComp implements-all gov.cca.Component, gov.cca.ports.GoPort
+  {
+  }
+
+  class FishDriverComp implements-all gov.cca.Component, gov.cca.ports.GoPort
+  {
+  }
+
+  class PetscPoissonSolver implements-all advaccelsims.PoissonSolver,
+    gov.cca.Component
+  {
+  }
+
+}

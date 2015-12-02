@@ -1,0 +1,11 @@
+The structure here is a little more rigid for tests to provide simple
+methods of finding inputs and what to clean afterward.
+
+Each test should be named test/cca/test_$TEST.sh
+where the test script does bocca create project $TEST
+and cds into $TEST for further work.
+Any sources needed (import, dependency mainly)
+should be kept in test/cca/$TEST.src
+
+The clean target then blows away anything named $TEST if there is
+a file test_$TEST.sh.

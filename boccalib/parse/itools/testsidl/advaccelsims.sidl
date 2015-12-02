@@ -1,0 +1,44 @@
+// 
+package advaccelsims version 0.1 {
+
+  // Non-port interfaces
+
+  interface Action {
+    void initialize(in string type);
+    void apply(); 
+  }
+
+  interface ReferenceParticle {
+    void initialize(in double energy, in double mass, 
+                    in double charge, in array<double> coordinates);
+    double get_energy();
+    double get_mass();
+    double get_charge();
+    array<double> get_coordinates();
+  }
+
+
+  // CCA ports
+
+  interface ParticleStore extends gov.cca.Port {
+    void initialize( );
+    void generate_particles(in double current, in int num_particles);
+    void configure_beam(in double scale1, in double scale2, in double scale3,
+                        in array<double,2,row-major> correlation_matrix);
+    array<double,2,column-major> get_particles();
+  }
+
+  interface Mapper extends gov.cca.Port {
+    // Implementations will get particles through ParticleStore port
+    void apply();
+  }
+
+  interface PoissonSolver extends gov.cca.Port {
+    // Implementations will get particles through ParticleStore port
+    void solve( );
+    void apply_space_charge_kick(in array<int,1> gridddim, in array<double,1> size, 
+                                 in array<double,1> offset, in double tau, 
+                                 in bool periodic_longitudinal, in string bc_transverse);
+  }
+
+}

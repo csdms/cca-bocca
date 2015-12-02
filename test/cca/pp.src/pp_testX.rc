@@ -1,0 +1,14 @@
+#!ccaffeine bootstrap file. 
+# ------- don't change anything ABOVE this line.-------------
+path set /home/baallan/cca/build/bocca/trunk/test/cca/pp/components/lib
+
+#pp.testX#
+
+repository get-global pp.testX
+instantiate pp.testX pp_testX
+display component pp_testX
+go pp_testX go
+display component pp_testX
+config pp_testX PP_1 ALL
+remove pp_testX
+quit

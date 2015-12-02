@@ -1,0 +1,17 @@
+  // DO-NOT-DELETE splicer.begin(ccafe1.StarterComponent._dtor)
+
+    svc = services; // in the component header we'd insert svc private ref.
+    if(svc._not_nil()) {
+
+      gov::cca::TypeMap tm = svc.createTypeMap();
+      gov::cca::ports::GoPort gp = *this;
+      svc.addProvidesPort(gp, std::string("go"), 
+			  std::string("gov.cca.ports.GoPort"), tm);
+      svc.registerUsesPort(std::string("output"), 
+			   std::string("ccafe3.StringConsumerPort"), tm);
+    } else {
+      std::cerr << ":-( Services Object is nil passed to "
+	     "ccafe1::StarterComponent_impl::setServices" << std::endl;
+    }
+
+  // DO-NOT-DELETE splicer.end(ccafe1.StarterComponent._dtor)

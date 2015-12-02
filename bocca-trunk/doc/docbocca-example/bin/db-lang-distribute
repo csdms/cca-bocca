@@ -1,0 +1,16 @@
+#!/bin/sh
+# script to repeat the same shell script n times, with LANG substituted.
+# by cxx, c, f90, java, python, f77.
+# Each run will be started from the same starting directory
+# (pwd when this script started)
+# 
+# $1 input entire script as a single quoted string.
+# 
+langs="c cxx f90 f77 java python"
+pwd=`pwd`
+for i in $langs; do
+	cd $pwd
+	task=`echo $1 | sed -e "s%LANG%$i%g"`
+	eval $task
+done
+exit 0

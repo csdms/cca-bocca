@@ -1,0 +1,30 @@
+# DO-NOT-DELETE bocca.splicer.begin(components)
+
+# SIDL files containing component declarations.	 These must be named
+# after their fully qualified package name.  More than one component
+# can be declared in a package, and contained in a single sidl file,
+# but multiple packages are disallowed.
+
+SIDL_FILES = 
+
+# The COMPONENTS list contains the fully-qualified names of the component
+# classes, augmented with -LANGUAGE, where LANGUAGE is the language
+# in which the component is implemented, e.g., c, cxx, f90.
+
+COMPONENTS = 
+
+# User-defined Ccaffeine scripts which can be executed with 'make userscript_rc'
+# where userscript_rc is the name of the Ccaffeine script file; all such scripts
+# must be placed in the tests/ subdirectory. The advantage to defining them here 
+# is that necessary environment variables, such as PYTHONPATH and CLASSPATH will 
+# be set automatically. 
+#
+# The hands-on exercises tasks (except for task4) are included as an example 
+# (note that some require languages that may not be available -- in that case 
+# the tests will produce an error message. You can run a test by running, 
+# for example, 'make task1_rc', in the $TUT_HOME/src/components directory 
+# (or 'make user-tests' to run all user scripts).
+
+USER_TESTS = 
+
+# DO-NOT-DELETE bocca.splicer.end(components)

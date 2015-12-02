@@ -1,0 +1,35 @@
+recursive subroutine pytest_f_setServices_mi(self, services, exception)
+  use sidl
+  use sidl_NotImplementedException
+  use gov_cca_CCAException
+  use gov_cca_Services
+  use sidl_BaseInterface
+  use sidl_RuntimeException
+  use pytest_f
+  use pytest_f_impl
+  ! DO-NOT-DELETE splicer.begin(pytest.f.setServices.use)
+  ! Insert-Code-Here {pytest.f.setServices.use} (use statements)
+  ! DO-NOT-DELETE splicer.end(pytest.f.setServices.use)
+  implicit none
+  type(pytest_f_t) :: self ! in
+  type(gov_cca_Services_t) :: services ! in
+  type(sidl_BaseInterface_t) :: exception ! out
+
+! DO-NOT-DELETE splicer.begin(pytest.f.setServices)
+! bocca-default-code. User may edit or delete.begin(pytest.f.setServices)
+    BOCCA_EXTERNAL
+    call boccaSetServices(self, services, exception) 
+    BOCCA_SIDL_CHECK_F90(exception , 'setServices')
+
+    ! Insert-UserCode-Here
+
+    return
+
+! Exit route when there are exceptions
+BOCCAEXIT      continue
+    ! Insert cleanup code here if needed.
+    return
+! bocca-default-code. User may edit or delete.end(pytest.f.setServices)
+
+! DO-NOT-DELETE splicer.end(pytest.f.setServices)
+end subroutine pytest_f_setServices_mi

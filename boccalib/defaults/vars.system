@@ -1,0 +1,5 @@
+# nearly everything we need to know is in the spec
+CCASPEC_VARS_SH='/home/baallan/cca/install/csb-b100-5/share/cca-spec-babel-0_8_1-babel-1.0.0/CCA_Babel_Vars.sh'
+. $CCASPEC_VARS_SH
+# customization here. subsequent loads of local settings will
+# override by overwriting variable values.

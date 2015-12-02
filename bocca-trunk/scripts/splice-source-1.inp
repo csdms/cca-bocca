@@ -1,0 +1,16 @@
+
+preambling crap
+
+ // DO-NOT-DELETE splicer.begin(myclass1.y)
+	spl line 3
+	spl line 4
+ // DO-NOT-DELETE splicer.end(myclass1.y)
+
+ // DO-NOT-DELETE splicer.begin(myclass1.z)
+	spl line 1
+ // DO-NOT-DELETE splicer.end(myclass1.z)
+
+ // DO-NOT-DELETE splicer.begin(myclass1.s)
+	spl 2
+ // DO-NOT-DELETE splicer.end(myclass1.s)
+post ambling crap

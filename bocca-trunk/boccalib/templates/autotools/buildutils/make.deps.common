@@ -1,0 +1,52 @@
+# ------------------ begin dependencies ---------------------
+# Port/interface within the project on which $(MYSYMBOL) depends
+ifneq ($(PORT_SIDL_DEPS_$(MYSYMBOL)),)
+	# make.ports is included in make.vars.common
+	PORT_SIDL_FILES += $(PORT_SIDL_DEPS_$(MYSYMBOL))
+	PORT_SYMBOLS = $(basename $(notdir $(PORT_SIDL_DEPS_$(MYSYMBOL))))
+	CLIENT_SYMBOLS += $(PORT_SYMBOLS)
+	CLIENT_IOR_TARGETS += $(foreach sym,$(PORT_SYMBOLS), $(addprefix $(PORT_TOP_DIR)/$(sym)/$(LANGUAGE)/,$(addsuffix _IOR.h,$(subst .,_,$(sym)))))
+    PORT_LIB_TARGETS +=$(sort $(strip $(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(PORT_TOP_DIR) $(LANGUAGE) $(PORT_SYMBOLS))))
+	CLIENT_INCLUDES += $(foreach sym,$(PORT_SYMBOLS), $(addprefix -I$(PORT_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+	ifneq ($(LANGUAGE),python)
+        PORT_LIBS += $(addprefix -l,$(addsuffix -$(LANGUAGE),$(PORT_SYMBOLS)))
+    endif
+	#CLIENT_LIB_DIRS += $(foreach sym,$(PORT_SYMBOLS),$(addprefix $(PORT_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+endif
+
+# External sidl files on which $(MYSYMBOL) depends
+ifneq ($(EXT_SIDL_DEPS_$(MYSYMBOL)),)
+	EXT_SIDL_FILES += $(EXT_SIDL_DEPS_$(MYSYMBOL)
+	CLIENT_IOR_TARGETS += $(foreach sym,$(EXT_SYMBOL_DEPS_$(MYSYMBOL)), $(addprefix $(EXTERNAL_TOP_DIR)/$(sym)/$(LANGUAGE)/,$(addsuffix _IOR.h,$(subst .,_,$(sym)))))
+	EXT_LIB_TARGETS +=$(sort $(strip $(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(EXTERNAL_TOP_DIR) $(LANGUAGE) $(EXT_SYMBOL_DEPS_$(MYSYMBOL)))))
+	CLIENT_INCLUDES += $(foreach sym,$(EXT_SYMBOL_DEPS_$(MYSYMBOL)),$(addprefix -I$(EXTERNAL_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+	ifneq ($(LANGUAGE),python)
+        EXT_LIBS += $(addprefix -l,$(addsuffix -$(LANGUAGE),$(EXT_SYMBOL_DEPS_$(MYSYMBOL))))
+    endif
+	#CLIENT_LIB_DIRS += $(foreach sym,$(EXT_SYMBOL_DEPS_$(MYSYMBOL)),$(addprefix $(EXTERNAL_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+endif
+
+# Classes/components within the project on which $(MYSYMBOL) depends
+ifneq ($(CLASS_SIDL_DEPS_$(MYSYMBOL)),)
+	CLASS_SIDL_FILES = $(CLASS_SIDL_DEPS_$(MYSYMBOL))
+	CLASS_SYMBOLS = $(basename $(notdir $(CLASS_SIDL_FILES)))
+	CLASS_NAMES = $(subst .,_,$(CLASS_SYMBOLS))
+	CLASS_LIB_TARGETS +=$(sort $(strip $(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(COMPONENT_CLIENTS_TOP_DIR) $(LANGUAGE) $(CLASS_SYMBOLS))))
+	CLASS_IMPL_LIBS +=$(sort $(strip $(shell $(UTILS_DIR)/getLibPath.sh server $(INSTALL_TARGET) $(COMPONENT_TOP_DIR) "none" $(CLASS_SYMBOLS))))
+	CLIENT_INCLUDES += $(foreach sym,$(CLASS_SYMBOLS), $(addprefix -I$(COMPONENT_CLIENTS_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+	ifneq ($(LANGUAGE),python)
+        CLASS_LIBS += $(addprefix -l,$(addsuffix -$(LANGUAGE),$(CLASS_SYMBOLS)))
+    endif
+	#CLIENT_LIB_DIRS += $(foreach sym,$(CLASS_SYMBOLS),$(addprefix $(COMPONENT_CLIENTS_TOP_DIR)/,$(sym)/$(LANGUAGE)))
+endif
+
+CLIENT_SIDL_FILES := $(PORT_SIDL_FILES) $(EXT_SIDL_FILES) $(CLASS_SIDL_FILES)
+CLIENT_LIB_TARGETS :=$(strip $(sort $(PORT_LIB_TARGETS) $(EXT_LIB_TARGETS) $(CLASS_LIB_TARGETS)))
+CLIENT_LIBS := $(PORT_LIBS) $(CLASS_LIBS) $(EXT_LIBS)
+SIDL_FILES += $(CLASS_SIDL_FILES)
+BABEL_INCLUDES = $(sort $(addprefix -I,$(PORT_SIDL_DEPS_$(MYSYMBOL))) $(addprefix -I,$(CLASS_SIDL_DEPS_$(MYSYMBOL))) $(addprefix -I,$(EXT_SIDL_DEPS_$(MYSYMBOL))))
+ifeq ($(filter -I$(CCA_SIDL),$(BABEL_INCLUDES)),)
+	BABEL_INCLUDES += -I$(CCA_SIDL)
+endif 
+
+ALL_INCLUDES += $(INCLUDES_$(MYSYMBOL)) $(CLIENT_INCLUDES) 

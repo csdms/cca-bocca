@@ -1,0 +1,14 @@
+package integrator version 1.0 {
+
+  interface IntegratorPort extends gov.cca.Port
+  {
+        // DO NOT DELETE bocca.splicer.begin(integrator.IntegratorPort)
+        // Insert your port methods here
+
+    double integrate(in double lowBound, in double upBound, in int count);
+
+        // DO NOT DELETE bocca.splicer.end(integrator.IntegratorPort)
+
+  }
+  
+}

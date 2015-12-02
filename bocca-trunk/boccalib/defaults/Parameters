@@ -1,0 +1,7 @@
+; # this is a template parameter port metadata file
+; # there is no instance name property because it is encoded in the filename.
+; # as Parameters.componentclassname.paramportinstancename
+; # there may be multiple groups and multiple keys per group.
+[@GROUP@]
+@PNAME@: Type=@PTYPE@ @VALUE@
+

@@ -1,0 +1,15 @@
+void
+pytest::cxx_impl::setServices_impl (
+  /* in */::gov::cca::Services services ) 
+// throws:
+//     ::gov::cca::CCAException
+//     ::sidl::RuntimeException
+{
+  // DO-NOT-DELETE splicer.begin(pytest.cxx.setServices)
+
+  // bocca-default-code. User may edit or delete.begin(pytest.cxx.setServices)
+     boccaSetServices(services); 
+  // bocca-default-code. User may edit or delete.end(pytest.cxx.setServices)
+  
+  // DO-NOT-DELETE splicer.end(pytest.cxx.setServices)
+}

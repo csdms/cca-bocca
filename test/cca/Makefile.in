@@ -1,0 +1,40 @@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+
+TESTS=$(shell ls test_*sh)
+BOCCA=@bindir@/bocca
+
+all:
+	@echo running $(TESTS)
+	-$(RM) *.out
+	-$(RM) -r scratch
+	mkdir scratch
+	@-for i in $(TESTS); do \
+		echo RUNNING $$i "--------------"; \
+		start=`date +%s`; \
+		./$$i $(BOCCA) `pwd`/scratch > $$i.out 2>&1 ; \
+		stop=`date +%s`; \
+		echo "Took `expr $$stop - $$start`" ; \
+	done
+	cat test_z_harness.sh.out
+
+TEST=pp
+one:
+	@-for i in $(TEST) ; do \
+		echo RUNNING $$i "--------------"; \
+		start=`date +%s`; \
+		./test_$${i}.sh $(BOCCA) `pwd`/scratch > test_$${i}.out 2>&1 ; \
+		stop=`date +%s`; \
+		echo "Took `expr $$stop - $$start`" ; \
+	done
+
+clean:
+	-$(RM) -r *.out scratch
+	@-for i in $(TESTS); do \
+		d=`echo $$i |sed -e 's/^test_//g' |sed -e 's/.sh$$//g'`; \
+		$(RM) -r $$d; \
+	done
+
+.PHONY: clean one all
+

@@ -1,0 +1,49 @@
+The initial file-layout of bocca metadata is failing us in that:
+a) version control of BOCCA/* has lots of collision because of local file path data.
+b) tracking external sidl entities is entirely dependent on local file paths.
+
+The plan at version 0.6.x is:
+
+To split existing files
+$proj.defaults
+$proj.dat
+into
+$proj.defaults
+$proj@user@.defaults <-- only thing this contains is host alias table per-user.
+$proj@$user@$host@.defaults
+and
+$proj.dat
+$proj@$user@$host.dat
+where all nonportabilities and external symbol references go into the user@host files.
+
+This introduces (for users on multiheaded clusters and
+other shared filesystem beasts) the need to be able to alias
+hosts which are equivalent. Similarly, users may on the
+same shared filesystem end up with different names on different hosts
+or may want to use the paths of another user, so user-aliasing is needed.
+
+The implementation details needed then:
+- configure support of the user specifying a sidl deployment search path in generated projects.
+- clarifying and documenting the project data loading sequence and search rules.
+- upgrade path for existing projects.
+
+loading should be:
+read $proj.defaults.
+process user aliasing rules.
+process host aliasing rules.
+read $proj@user@host.defaults. The user's local DPATH is stored here.
+read $proj.dat, which includes reading its list of sidl symbols expected to be resolved externally 
+by reading $proj@user@host.dat.
+read $proj@user@host.dat.
+
+$proj@user@host.dat contains fullpath names of depl files and datestamps and checksums of those files.
+If a datestamp on the filesystem varies from that recorded, the checksum is recomputed.
+If the checksum changes, everything in the file is reverified. In debug mode, 
+verification is always done. In any case where verification fails, bocca
+will do nothing until the issue is resolved by the user setting/amending to get the right DPATH.
+
+Note: DPATH is used for first resolution of any symbol. once resolved to a depl, the
+DPATH is never again consulted for that combination of user,host,symbol unless the depl
+disappears or the user requests an explicit change. 
+Disappearing depls will be path rechecked and, if found, warned about and updated.
+If not resolved, error occurs until resolved.

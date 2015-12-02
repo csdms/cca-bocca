@@ -1,0 +1,84 @@
+
+TOC
+1) Development guidelines
+2) Revision policies
+3) Testing
+
+
+1) Development Guidelines
+
+Whatever the predominant indent style is in an existing python
+file, please follow it.  Do not reformat.  Never use tabs.
+
+The most common indent used in the tree is 4 spaces; new files 
+should use this indent.
+
+Always run the test suite before committing any significant
+change. Even if you think that change is purely additive.
+
+Please write at least one test script in test/cl for each new
+feature you add. Writing tests is hard and you understand your
+new feature best. There is no designated test writer.
+
+When fixing bugs, please create a test which verfiies that the
+repaired behavior is working, and commit it to the test suite.
+
+
+2) Revision policies.
+
+a) The trunk is unstable; support for anyone checking out the
+trunk is at most 'update from the trunk again, we fixed it.'
+The trunk should always be at an odd minor revision (0.5, 0.7, 0.13).
+
+b) Stable branches are on even-numbered minor revisions. The 
+changes allowed on stable branches are restricted to:
+i) those which cannot possibly break user-written code.
+ii) user-written code includes impls and makefile hooks and fragments.
+
+c) The following classes of changes *will* break user code if the user
+shifts *in either direction* among the multiple patch releases of 
+the stable branch, and therefore are not allowed on the stable branch.
+
+i) Adding/removing methods to the generated bocca methods on 
+component declarations.
+ii) Adding/removing new options and commands to the command line.
+iii) Adding/removing data members in impl private data.
+iv) Changing the naming convention of locally generated variables.
+v) Adding/removing/changing the logic of  makefile hook targets.
+
+d) The processes for branching and tagging the repository
+are described in doc/release.
+Stable distributions should be made only from branches/$stable-version.x.
+Specific distributions should be tagged (svn copy from branches/N.N.x to 
+tags/N.N.N).
+Nothing should ever be edited and committed back to the tags directory.
+The release label on the trunk should always be 'unstable'.
+
+e) When making a commit that you know is not compatible with the
+current stable branch (per the conditions of c above or for any
+other reason) please note it in your commit message.
+
+f) When changing anything in the trunk that will be 
+user-visible or cause bocca itself to crash on old projects
+or old bocca to crash on new projects, consider carefully if 
+the change is such that a python script could be written to 
+automatically upgrade an existing project using the current 
+stable branch bocca to the trunk. 
+i) If it's possible, write the script, document it, and
+put it in boccalib/migrations/. 
+ii) If it's not possible, document
+why it's not possible and why it's still needed and what the
+human-in-the-loop upgrade strategy must be by posting on the
+bocca-dev mailing list.
+
+
+3) Testing
+a) Run tests routinely.
+b) Use python lint checkers whenever possible.
+c) Run tests before committing.
+d) Write tests for bug fixes so we can be sure the bug doesn't return
+or show up when a branch misses a patch.
+e) Write tests for new features -- noone else probably understands
+your feature, but they can generate additional tests once you
+provide a base case test.
+f) Write back compatibility tests whenever it is feasible.

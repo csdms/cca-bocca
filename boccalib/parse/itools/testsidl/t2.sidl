@@ -1,0 +1,5 @@
+package x version 0.0 {
+class y {
+static string sfrom[from](in array<int> a);
+}
+}

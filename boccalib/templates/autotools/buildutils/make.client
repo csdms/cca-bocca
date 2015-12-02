@@ -1,0 +1,306 @@
+# --------! Avoid modifying this file unless you know what you are doing !-------
+# 
+# This file contains common makefile elements for building SIDL-based client
+# code, generating one library per interface. CCA ports and non-port
+# SIDL interfaces are treated in the same fashion.
+
+CLIENT_BUILD=1
+
+MYDIR := $(shell bash -c "pwd -P")
+
+# If no CLIENT_NAME or LANGUAGE variables are given, extract these 
+# settings from the path, which is ports/sidl_symbol/language
+ifeq ($(LANGUAGE),)
+	LANGUAGE := $(shell basename $(MYDIR))
+endif
+
+# The common.make file contains CCA and Babel settings, as well as 
+# compilation targets for all languages.
+ifeq ($(shell if test -f ../../../buildutils/make.vars.common ; then echo "0"; else echo "1"; fi),0)
+	include ../../../buildutils/make.vars.common
+	# this also includes make.project, make.vars.user (all levels), ports/make.ports
+else
+    ifeq ($(shell if test -f ../../../../buildutils/make.vars.common ; then echo "0"; else echo "1"; fi),0)
+	    include ../../../../buildutils/make.vars.common
+    else    
+	    $(error "Please run configure in the top-level directory before invoking make")
+	endif
+endif
+
+ifeq ($(CLIENT_NAME),)
+	CLIENT_NAME := $(shell basename $(shell dirname $(MYDIR)))
+endif 
+MYSYMBOL:=$(CLIENT_NAME)
+DUMMYFUNC=$(subst .,_,$(CLIENT_NAME))_$(LANGUAGE)
+
+DEPLNAME=$(CLIENT_NAME)_depl.xml
+
+ifeq ($(SIDL_DIR),)
+	SIDL_DIR = $(CLIENT_TOP_DIR)/sidl
+endif
+
+SETUP_PY=setup.py
+
+ifeq ($(CLIENT_TOP_DIR),)
+	CLIENT_TOP_DIR := $(PORT_TOP_DIR)
+endif
+
+# Client library location and name
+ifndef LIB_DIR
+	LIB_DIR=$(MYDIR)
+endif
+
+LIBNAME=lib$(CLIENT_NAME)-$(LANGUAGE).la
+
+ifeq ($(MAKECMDGOALS),install)
+    LIB_DIR:=$(MYDIR)/.install
+endif
+ifeq ($(INSTALL_TARGET),install)
+    LIB_DIR:=$(MYDIR)/.install
+endif
+LIBPATH=$(LIB_DIR)/$(LIBNAME)
+
+ifeq ($(LANGUAGE),python)
+	CLIENTLIBPATH=$(MYDIR)/$(addsuffix .so,$(shell echo $(CLIENT_NAME) | sed -e 's|\.|/|g'))
+	LIBNAME=$(notdir $(CLIENTLIBPATH))
+	LIB_DIR=$(dir $(CLIENTLIBPATH))
+	LIBPATH=$(CLIENTLIBPATH)
+endif
+
+MYCOLOR=$(BLUE)
+
+#=========================================================================================
+# Settings for client code generation with Babel
+# Here we handle dependencies on other interfaces.
+
+ifneq ($(findstring $(CLIENT_NAME),$(EXTERNAL_XML_SYMBOLS)),)
+	SIDL_FILE =
+endif
+
+ifdef EXT_SYMBOL_SIDL_$(CLIENT_NAME)
+	SIDL_FILE = $(EXT_SYMBOL_SIDL_$(CLIENT_NAME))	
+else
+ifeq ($(SIDL_FILE),)
+	SIDL_FILE = $(SIDL_DIR)/$(CLIENT_NAME).sidl
+endif
+endif
+
+# Computes include paths and library names for all SIDL symbol this component/class depends on.
+# Uses the value of MYSYMBOL (the fully qualified SIDL symbol of the entity we are building).
+# Defines the variables: CLIENT_SIDL_FILES, CLIENT_IOR_TARGETS, CLIENT_LIB_TARGETS, CLIENT_INCLUDES, CLIENT_LIB_DIRS
+# and updates the SIDL_FILE variable with dependency SIDL files and the ALL_INCLUDES and BABEL_INCLUDES variables 
+# with the computed include paths. Also extends the vpath accordingly.
+include $(UTILS_DIR)/make.deps.common
+
+
+SYM_TO_FILE = $(subst .,_,$(CLIENT_NAME))
+IOR_TARGET = $(MYDIR)/$(SYM_TO_FILE:%=%_IOR.h)
+
+ALL_LIBS = $(addprefix -R,$(INSTALL_LIB_DIR)) $(addprefix -L,$(INSTALL_LIB_DIR)) $(CLIENT_LIBS) $(CCA_LIBS)
+
+# Add full paths to object files (otherwise make doesn't do dependencies correctly in some cases)
+MYOBJS = $(addprefix $(MYDIR)/,$(OBJS)) $(addprefix $(MYDIR)/,$(F90_OBJS))
+
+# For enums, there are no source files (other than headers) for some of the languages,
+# so we generate a dummy c function to avoid library creation errors on some platforms
+ifeq ($(strip $(MYOBJS)),)
+    MYOBJS = $(MYDIR)/dummy.lo
+    SRC += $(MYDIR)/dummy.c
+    ENUM_BUILD=1
+    ifeq ($(LANGUAGE),python)
+        SRC += $(LIB_DIR)/dummy2.c
+        PKGDIR =$(dir $(subst .,/,$(MYSYMBOL)))
+        FIX_SETUP_PY =$(strip $(shell grep $(MYSYMBOL) $(MYDIR)/setup.py | wc -l))
+    endif
+endif
+
+# Parallel builds 
+# Use a real language to fix the flags to avoid nasty parallel build problems
+#MAKEFLAGS=$(shell $(UTILS_DIR)/processMakeflags.py '${MAKEFLAGS}' '${MAKECMDGOALS}' '${MAKELEVEL}' '${FROMTOP}')
+
+
+#=========================================================================================
+#  Client-specific targets
+#-----------------------------------------------------------------------------------------
+# The $(LIBPATH) target is defined in common.make
+all: check_top_dir $(LIBPATH)
+	
+
+#----------------------------------------------------------------------------------------
+# Common rules for building client and server code
+include $(UTILS_DIR)/make.rules.common
+
+#-----------------------------------------------------------------------------------------
+# Make sure the project directory structure is as expected (project hasn't been moved)
+check_top_dir:
+	@if ! test "$(MYDIR)" = "$(CLIENT_TOP_DIR)/$(CLIENT_NAME)/$(LANGUAGE)"; then \
+		echo "***Project directory has changed: $(MYDIR) != $(CLIENT_TOP_DIR)/$(CLIENT_NAME)/$(LANGUAGE). Please run configure in the top-level project directory."; \
+		exit 1; \
+	fi
+	
+#-----------------------------------------------------------------------------------------
+# Generated client code with Babel
+.gencode $(IOR_TARGET) : $(SIDL_FILE)
+	$(HIDE_LIBTOOL)if [ "x$(REALQUIET)" = "x" ] ; then echo "   [c] using Babel to generate $(MYCOLOR)$(LANGUAGE)$(BLACK) client code for $(MYCOLOR)$(CLIENT_NAME)$(BLACK)... "; fi; \
+	if test "xx$(SIDL_FILE)" != "xx" ; then \
+		out=`$(BABEL) --timestamp -c$(LANGUAGE) $(BABEL_INCLUDES) $(XML_REP) \
+			$(EXTRA_BABEL_OPTIONS) $(SIDL_FILE)`; \
+	else \
+		out=`$(BABEL) --timestamp -c$(LANGUAGE) $(BABEL_INCLUDES) $(XML_REP) \
+			$(EXTRA_BABEL_OPTIONS) $(CLIENT_NAME)`; \
+	fi; \
+	echo "$$?" > .babelretcode; \
+	if test "x$$out" != "x" ; then echo "$$out"; fi;
+	$(HIDE_LIBTOOL)if [ ! -d $(INSTALL_INCLUDE_DIR) ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_INCLUDE_DIR); fi;
+	$(HIDE_LIBTOOL)-find . -name "*.h*" -exec cp -f {} $(INSTALL_INCLUDE_DIR) \;
+	$(HIDE_LIBTOOL)-if [ "$(INSTALL_INCLUDE_DIR)" != "$(LOCAL_INSTALL_PREFIX)/include" ]; then \
+		if [ ! -d $(LOCAL_INSTALL_PREFIX)/include ]; then $(UTILS_DIR)/mkdirhier $(LOCAL_INSTALL_PREFIX)/include; fi; \
+		find . -name "*.h*" -exec cp -f {} $(LOCAL_INSTALL_PREFIX)/include \; ; \
+	fi
+
+$(MYOBJS): $(IOR_TARGET) $(CLIENT_LIB_TARGETS) $(SRC)
+
+$(LIBPATH): $(MYOBJS)
+	@if [ "x$(REALQUIET)" = "x" ] ; then \
+		if [ "x$(DEBUG)" != "x" ] ; then echo "   [c] creating library: $(MYCOLOR)$(LIBPATH)$(BLACK)... "; \
+		else echo "   [c] creating library: $(MYCOLOR)$(notdir $(LIBPATH))$(BLACK)... "; fi; \
+	fi
+	$(HIDE_LIBTOOL)if [ "x$(LANGUAGE)" = "xpython" ]; then \
+		$(RM) $(LIBPATH); \
+		$(PYTHON) setup.py build_ext $(HIDE_COMPILE) \
+			--inplace --include-dirs $(ALLPYTHON_MODINC) \
+			--library-dirs=$(CCASPEC_BABEL_libdir) > .output 2>&1; \
+		if [ "$$?" != "0" ]; then cat .output; exit 1; fi; \
+	else \
+		if [ "x$(DEBUG)" != "x" ]; then \
+			echo "DEBUG: $(LIBTOOL) --mode=link --tag=CXX $(HIDE_COMPILE) $(CXX) $(INCLUDES) -rpath $(INSTALL_LIB_DIR) $(MYOBJS) -o $@ $(ALL_LIBS)" ; \
+		fi; \
+		if [ "x$(LANGUAGE)" = "xjava" ]; then \
+			$(CCASPEC_BABEL_JAVAC) $(JAVAFLAGS_USER) $(JAVA_CP) $(JAVASRCS) > .output 2>&1; \
+			if [ "$$?" != "0" ]; then cat .output; exit 1; fi; \
+		fi ; \
+		$(LIBTOOL) --mode=link --tag=CXX $(HIDE_COMPILE) \
+		  	$(CXX) $(INCLUDES) -rpath $(INSTALL_LIB_DIR) $(MYOBJS) -o $@ $(ALL_LIBS) ; \
+	fi
+	$(HIDE_LIBTOOL)if [ "x$(INSTALL_TARGET)" != "x" ]; then \
+		if [ "x$(DEBUG)" != "x" ] ; then echo "$(MAKE) $(CCA_MAKEFLAGS) INSTALL_TARGET=$(INSTALL_TARGET) LANGUAGE=$(LANGUAGE) CLIENT_TOP_DIR=$(CLIENT_TOP_DIR) SIDL_DIR=$(SIDL_DIR) $(INSTALL_TARGET) PARENT=$$PPID;"; fi; \
+		$(MAKE) $(CCA_MAKEFLAGS) INSTALL_TARGET=$(INSTALL_TARGET) LANGUAGE=$(LANGUAGE) CLIENT_TOP_DIR=$(CLIENT_TOP_DIR) SIDL_DIR=$(SIDL_DIR) $(INSTALL_TARGET) PARENT=$$PPID; \
+	fi
+	@if [ "x$(DEBUG)" != "x" ] ; then echo "   [c] created and installed $(LIBPATH) in $(INSTALL_LIB_DIR)... "; fi
+	
+$(INSTALL_TARGET): $(LIBPATH)
+	@if [ "x$(DEBUG)" != "x" ] ; then echo "   [c] installing library: $(MYCOLOR)$(LIBPATH)$(BLACK)... "; \
+	else if [ "$(INSTALL_TARGET)" != "install_local" ]; then echo "   [c] installing library: $(MYCOLOR)$(notdir $(LIBPATH))$(BLACK)... "; fi; fi
+	$(HIDE_LIBTOOL)if [ ! -d $(INSTALL_LIB_DIR) ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR); fi;
+	$(HIDE_LIBTOOL)if [ ! -d $(INSTALL_DATA_DIR)/cca ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_DATA_DIR)/cca; fi;
+	$(HIDE_LIBTOOL)$(INSTALL_DATA) $(SIDL_FILE) $(INSTALL_DATA_DIR)/cca
+	$(HIDE_LIBTOOL)if [ "x$(LANGUAGE)" = "xpython" ]; then \
+	   $(PYTHON) setup.py install_headers $(HIDE_COMPILE) \
+	   --install-dir=$(INSTALL_INCLUDE_DIR)/$(PYTHON_VER)/babel \
+	   --library-dirs=$(CCASPEC_BABEL_libdir) \
+	   --force $(OUT_REDIRECT); \
+	   $(PYTHON) setup.py install_lib $(HIDE_COMPILE) \
+	   --build-dir=$(MYDIR) \
+	   --install-dir=$(INSTALL_LIB_DIR)/$(PYTHON_VER)/site-packages \
+	   --library-dirs=$(CCASPEC_BABEL_libdir) \
+	   --force $(OUT_REDIRECT); \
+	else \
+	   if [ "x$(DEBUG)" != "x" ]; then echo "DEBUG: $(LIBTOOL) --mode=install $(HIDE_COMPILE) cp $(LIBPATH) $(INSTALL_LIB_DIR);"; fi; \
+	   $(LIBTOOL) --mode=install $(HIDE_COMPILE) cp $(LIBPATH) $(INSTALL_LIB_DIR); \
+	fi;
+	$(HIDE_LIBTOOL)if [ ! -d $(INSTALL_INCLUDE_DIR) ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_INCLUDE_DIR); fi;
+	$(HIDE_LIBTOOL)cp *.h* $(INSTALL_INCLUDE_DIR)
+	$(HIDE_LIBTOOL)-if [ "x$(LANGUAGE)" = "xf90" ]; then cp -f *.mod $(INSTALL_INCLUDE_DIR); fi
+	$(HIDE_LIBTOOL)if test "x$(LANGUAGE)" = "xf77" ; then \
+        for f in `find . -name '*.inc'`; do \
+          if [ "x$f" != "x" ] && [ -e "$f" ]; then cp -f $f $(INSTALL_INCLUDE_DIR) ; fi; \
+        done; \
+	fi
+	$(HIDE_LIBTOOL)if [ "x$(LANGUAGE)" = "xjava" ]; then \
+		if [ ! -d "$(INSTALL_LIB_DIR)/$(LANGUAGE)" ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR)/$(LANGUAGE); fi; \
+		classes=`find . -name '*.class'` && \
+		dirs=`for i in \`echo $$classes\` ; do dirname $$i; done` && \
+		dirsunique=`for i in $$dirs ; do echo "$$i" ; done | sort -u` && \
+		for dir in $$dirsunique; do \
+			if [ ! -d $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ; fi; \
+			cp -f $$dir/*.class  $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ;\
+		done;\
+		mypkg=`echo $(CLIENT_NAME) | sed -e 's|\..*||'`; \
+		jar -cf $(CLIENT_NAME).jar $$mypkg; \
+		cp -f $(CLIENT_NAME).jar $(INSTALL_LIB_DIR)/$(LANGUAGE); \
+	fi;
+	$(HIDE_LIBTOOL)if [ ! -d "$(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)" ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME); fi;
+	$(HIDE_LIBTOOL)( if ! test -f $(DEPL_TOP_DIR)/.$(PARENT).depl.$(CLIENT_NAME) ; then \
+			echo "   [c] building $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)/$(DEPLNAME) ... $(PARENT) "; \
+			if test "x$(CCA_TYPE_$(CLIENT_NAME))" = "xCLASS" -o "x$(CCA_TYPE_$(CLIENT_NAME))" = "xCOMPONENT"; then \
+				implarg="--language=$(CCA_IMPL_$(CLIENT_NAME))"; \
+			fi; \
+			$(CCASPEC_GENCCAXML) $(CCA_TYPE_$(CLIENT_NAME)) $(CLIENT_NAME) \
+				-o $(DEPL_TOP_DIR)/$(DEPLNAME) \
+				--deployment-path=$(DEPL_TOP_DIR) \
+				--prefix=$(PREFIX) \
+				--lib=$(INSTALL_LIB_DIR) \
+				--project=$(PROJECT_NAME) \
+				$$implarg \
+				--clients=$(INSTALL_LANGUAGES_COMMA) ; \
+			$(INSTALL_DATA) $(DEPL_TOP_DIR)/$(DEPLNAME) $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)/$(DEPLNAME) ; \
+			touch $(DEPL_TOP_DIR)/.$(PARENT).depl.$(CLIENT_NAME) ; \
+			if test "x$(PARENT)" = "x"; then \
+				$(RM) $(DEPL_TOP_DIR)/.$(PARENT).depl.$(CLIENT_NAME) ; \
+			fi; \
+		fi ; \
+	)
+
+$(MYDIR)/dummy.c:
+	@# A workaround for handling the enum problem -- no object files for some languages only,
+	@# which makes library creation impossible on some systems (e.g., Mac OS X)
+	$(HIDE_LIBTOOL)if [ "x$(ENUM_BUILD)" = "x1" ]; then \
+		echo "int $(DUMMYFUNC)(int i) {i++; return i;}" > $(MYDIR)/dummy.c; \
+	fi
+
+$(LIB_DIR)/dummy2.c:
+	$(HIDE_LIBTOOL)if [ "x$(ENUM_BUILD)" = "x1" ] && [ "x$(LANGUAGE)" = "xpython" ]; then \
+		echo "int $(DUMMYFUNC)2(int i) {i++; return i;}" > $(LIB_DIR)/dummy2.c; \
+		if [ "x$(FIX_SETUP_PY)" = "x0" ]; then \
+			sed -e 's|ext_modules = \[|ext_modules = \[Extension("${MYSYMBOL}", \["${PKGDIR}dummy2.c"\],library_dirs=lib_dirs,libraries=libs)|' $(MYDIR)/setup.py >$(MYDIR)/setup.tmp.py; \
+			cp $(MYDIR)/setup.tmp.py $(MYDIR)/setup.py; \
+		fi;\
+	fi
+
+clean:
+	$(HIDE_LIBTOOL)$(LIBTOOL) --mode=clean $(HIDE_COMPILE) $(RM) *.lo $(CLIENT_LIB) .lib .install
+	$(HIDE_LIBTOOL)- if [ "x$(LANGUAGE)" = "xpython" ]; then \
+	   $(PYTHON) setup.py clean --all $(HIDE_COMPILE);\
+	fi;
+	
+#-----------------------------------------------------------------------------------------
+.PHONY: .gencode check_top_dir local_install install depmsg 
+
+# debugging info
+debug:
+	@echo "EXTERN_BUILD=$(EXTERN_BUILD)"
+	@echo "CLIENT_TOP_DIR=$(CLIENT_TOP_DIR)"
+	@echo "LOCAL_PREFIX=$(LOCAL_PREFIX)"
+	@echo "LOCAL_INSTALL_PREFIX=$(LOCAL_INSTALL_PREFIX)"
+	@echo "SIDL_FILE=$(SIDL_FILE)"
+	@echo "LIBPATH=$(LIBPATH)"
+	@echo "LIBNAME=$(LIBNAME)"
+	@echo "MYDIR=$(MYDIR)"
+	@echo "ALL_INCLUDES=$(ALL_INCLUDES)"
+	@echo "IOR_TARGET=$(IOR_TARGET)"
+	@echo "SIDL_DEPENDENCIES=$(SIDL_DEPENDENCIES)"
+	@echo "SRCS=$(SRCS)"
+	@echo "OBJS=$(OBJS)"
+	@echo "MYOBJS=$(MYOBJS)"
+	@echo "F90_OBJS=$(F90_OBJS)"
+	@echo "F90 dependencies: "
+	@echo "	$(F90IMPL_OBJS): $(addprefix $(MYDIR)/,$(F90MOD_OBJS)) $(addprefix $(MYDIR)/$(GLUEDIR),$(F90ARRAYMOD_OBJS))"
+	@echo "$(F90ARRAYMOD_OBJS): $(addprefix $(MYDIR)/,$(F90MOD_OBJS))"
+	@echo "$(F90MOD_OBJS): $(addprefix $(MYDIR)/$(GLUEDIR),$(F90STUB_OBJS))"
+	@echo "$(F90STUB_OBJS): $(addprefix $(MYDIR)/$(GLUEDIR),$(F90TYPE_OBJS))"
+	@echo "$(F90_OBJS): $(F90_SRCS)"
+	@echo "CLIENT_LIB_TARGETS=$(CLIENT_LIB_TARGETS)"
+	@echo "PORT_LIB_TARGETS=$(PORT_LIB_TARGETS)"
+	@echo "MAKEFLAGS=$(MAKEFLAGS)"
+	@echo "MAKECMDGOALS=$(MAKECMDGOALS)"
+

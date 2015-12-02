@@ -1,0 +1,15 @@
+# This file contains user-specified component-specific variables. 
+# Other settings can be specified through environment variables,
+# e.g., CXX, CXXFLAGS, or command line arguments to make.
+# Also, other makefile segments can be included here.
+# This file is included in the external/Makefile, and in individual
+# client Makefiles in the external subdirectories.
+# --------------------------------------------------------------
+# Include path directives, including paths to Fortran modules
+INCLUDES = 
+
+# Library paths and names
+LIBS = 
+
+# Additional phony targets defined by users (the initial targets in make.rules.user are already included)
+USER_PHONY = 

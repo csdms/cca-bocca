@@ -1,0 +1,5 @@
+; # this is a template generic babel class metadata
+; # there is no Name stored as it is encoded in the filename
+; # Class.fullsidlclassname
+Language: @LANGUAGE@ ; # implementation of this class
+SidlFiles: @SIDLPATH@ ; # where we keep the sidl description. normally .

@@ -1,0 +1,33 @@
+// insert case
+  /* DO-NOT-DELETE outer.begin(n1.s1) */
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.begin(n1.s1) */
+	-1
+	-2
+	-3
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.end(n1.s1) */
+	1
+	2
+	3
+  /* DO-NOT-DELETE outer.end(n1.s1) */
+
+// replace case
+  /* DO-NOT-DELETE outer.begin(n1.s2) */
+	4
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.begin(n1.s2) */
+	c
+	d
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.end(n1.s2) */
+	5
+	6
+  /* DO-NOT-DELETE outer.end(n1.s2) */
+
+// unmatched case common
+  /* DO-NOT-DELETE outer.begin(n1._misc) */
+	7
+  /* DO-NOT-DELETE outer.end(n1._misc) */
+
+// unmatched case
+  /* DO-NOT-DELETE outer.begin(n1.s3) */
+	8
+     /*	Insert-Code-Here */
+  /* DO-NOT-DELETE outer.end(n1.s3) */

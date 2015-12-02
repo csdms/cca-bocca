@@ -1,0 +1,12 @@
+package arrayDrivers version 1.0 {
+
+/*
+ * C driver for a component that provides the LinearOp port
+ */
+  class CDriver implements-all gov.cca.ports.GoPort,
+                                 gov.cca.Component,
+                                 gov.cca.ComponentRelease
+  {
+  }
+
+}

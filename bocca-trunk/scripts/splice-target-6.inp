@@ -1,0 +1,34 @@
+
+preambling
+
+ // DO-NOT-DELETE splicer.begin(x.w)
+	org line 1
+	org line 2
+// Insert-Code-Here
+      // DO-DELETE foo.begin()
+crap to die noncca
+      // DO-DELETE foo.end()
+      // DO-DELETE-WHEN-IMPLEMENTING exception.begin()
+babelcrap
+      // DO-DELETE-WHEN-IMPLEMENTING exception.end()
+
+ // DO-NOT-DELETE splicer.end(x.w)
+
+ // DO-NOT-DELETE splicer.begin(x.y)
+	org line 1
+	org line 2
+ // DO-NOT-DELETE splicer.end(x.y)
+
+ // DO-NOT-DELETE splicer.begin(x.z)
+      // DO-DELETE-WHEN-IMPLEMENTING exception.begin()
+babelcrap
+      // DO-DELETE-WHEN-IMPLEMENTING exception.end()
+ // DO-NOT-DELETE splicer.end(x.z)
+
+ // DO-NOT-DELETE splicer.begin(x.q)
+      // DO-DELETE-WHEN-IMPLEMENTING exception.begin()
+babelcrap
+      // DO-DELETE-WHEN-IMPLEMENTING exception.end()
+ // DO-NOT-DELETE splicer.end(x.q)
+
+post ambling

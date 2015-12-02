@@ -1,0 +1,13 @@
+
+preambling
+
+ // DO-NOT-DELETE splicer.begin(myclass2.y)
+ // DO-NOT-DELETE splicer.end(myclass2.y)
+
+ // DO-NOT-DELETE splicer.begin(myclass2.z)
+ // DO-NOT-DELETE splicer.end(myclass2.z)
+
+ // DO-NOT-DELETE splicer.begin(myclass2.q)
+ // DO-NOT-DELETE splicer.end(myclass2.q)
+
+post ambling

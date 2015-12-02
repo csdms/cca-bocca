@@ -1,0 +1,38 @@
+13,15c13,14
+< pre-build-user:
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> pre-build-user: source_rule shared_rule
+> 	@echo "Port build hook $@: source"
+20,21c19
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Port build hook $@: source"
+25,26c23
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Port build hook $@: source"
+31,32c28
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Port build hook $@: source"
+36,37c32
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Port build hook $@: source"
+41,42c36,42
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Port build hook $@: source"
+> 
+> source_rule:
+>  	@echo "Inside source rule: ${PORT_SOURCE_VAR}"
+>  
+> shared_rule:
+>  	@echo "Inside shared rule (source): ${PORT_SHARED_VAR}"

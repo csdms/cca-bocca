@@ -1,0 +1,29 @@
+/* 
+ * Parallel driver components 
+ */
+package pdrivers version 1.0 {
+
+/*
+ * One for parallel Fortran:
+ */
+  class F90DriverMPI implements gov.cca.ports.GoPort,
+                                 gov.cca.Component,
+                                 gov.cca.ComponentRelease
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+     void releaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+ 
+/*
+ * One for parallel C++:
+ */
+  class CXXDriverMPI implements gov.cca.ports.GoPort,
+                                 gov.cca.Component,
+                                 gov.cca.ComponentRelease
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+     void releaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+}

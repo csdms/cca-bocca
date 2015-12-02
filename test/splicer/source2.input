@@ -1,0 +1,27 @@
+// insert case
+  /* DO-NOT-DELETE splicer.begin(n1.s1) */
+	1
+	2
+	3
+  /* DO-NOT-DELETE splicer.end(n1.s1) */
+  
+// replace case
+  /* DO-NOT-DELETE splicer.begin(n1.s2) */
+	4
+  /* DO-NOT-DELETE inner.begin(n1.s2) */
+	a
+	b
+  /* DO-NOT-DELETE inner.end(n1.s2) */
+	5
+	6
+  /* DO-NOT-DELETE splicer.end(n1.s2) */
+
+// unmatched case common
+  /* DO-NOT-DELETE splicer.begin(n1._misc) */
+	8
+  /* DO-NOT-DELETE splicer.end(n1._misc) */
+
+// unmatched case
+  /* DO-NOT-DELETE splicer.begin(n1.s3) */
+	7
+  /* DO-NOT-DELETE splicer.end(n1.s3) */

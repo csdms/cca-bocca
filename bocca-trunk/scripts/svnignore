@@ -1,0 +1,10 @@
+#!/bin/sh
+if test -f .ignore; then
+	echo "Setting svn to ignore all file patterns in .ignore"
+	svn propset svn:ignore -F .ignore .
+	exit 0
+else
+	echo "Did not find a .ignore file to use with svn"
+	echo "Default or previously set ignores unchanged"
+	exit 1
+fi

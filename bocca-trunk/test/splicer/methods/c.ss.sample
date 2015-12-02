@@ -1,0 +1,23 @@
+void
+impl_pytest_c_setServices(
+  /* in */ pytest_c self,
+  /* in */ gov_cca_Services services,
+  /* out */ sidl_BaseInterface *_ex)
+{
+  *_ex = 0;
+  {
+  /* DO-NOT-DELETE splicer.begin(pytest.c.setServices) */
+
+  /* bocca-default-code. User may edit or delete.begin(pytest.c.setServices) */
+    impl_pytest_c_boccaSetServices(self, services, _ex); SIDL_CHECK(*_ex);
+  /* bocca-default-code. User may edit or delete.end(pytest.c.setServices) */
+  
+  /*  Insert-UserCode-Here {pytest.c.setServices} (setServices method) */
+
+EXIT:;
+    /* Insert additional exception cleanup here if needed. */
+    return;
+
+  /* DO-NOT-DELETE splicer.end(pytest.c.setServices) */
+  }
+}

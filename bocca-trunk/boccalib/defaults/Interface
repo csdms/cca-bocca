@@ -1,0 +1,4 @@
+; # this is a template generic babel class metadata
+; # there is no Name stored as it is encoded in the filename
+; # Interface.fullsidlinterfacename
+SidlFiles: @SIDLPATH@ ; # where we keep the sidl description. normally .

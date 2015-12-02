@@ -1,0 +1,3 @@
+Local (no prefix specified to configure, or configure never run in the case of new bocca projects)
+do their installs here. Deleting everything in this directory except the README and any version
+control files is a good way to clean it.

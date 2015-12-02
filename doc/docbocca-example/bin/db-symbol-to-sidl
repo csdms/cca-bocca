@@ -1,0 +1,19 @@
+#!/bin/sh
+# this assumes bocca is in the path and pwd is in a project.
+if test $# -ne 1; then
+	echo "$0: Incorrect number of arguments."
+	exit 1
+fi
+# verify bocca in path
+dump=`bocca display`
+if ! test "x$?" = "x0";  then
+	echo "$0: Requires bocca to be in the path to work."
+	exit 1
+fi
+file=`bocca display $1 | grep definition |sed -e 's%.*SIDL definition: %%g'`
+if test "x$file" = "x"; then
+	echo "Unable to determine sidl file for $1"
+	exit 1
+fi
+echo $file
+exit 0

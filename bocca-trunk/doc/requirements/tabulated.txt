@@ -1,0 +1,155 @@
+Purpose:
+This file lists the end-user needs bocca is meant to address,
+and all the requirements derived therefrom with linkages.
+The end user is typically some form of software developer for
+HPC platforms with the goal of creating, maintaining, and integrating
+CCA software components into HPC applications.
+The primary use-case is the CCA tutorial, documented elsewhere.
+
+Mechanics:
+The items are tabulated by lettered section (P,S,F,I,C,B) and
+numbered within section. please list linkages (should be backlinks)
+as [supports %s%n] and do not abbreviate [e.g. use P2, P3, not P2,3].
+With a bit of tweaking, a roundup tracker could be used for
+this table, but it's unlikely we'll get Tom time to do it.
+
+Data:
+
+
+Primary needs (P):
+
+1) To easily evaluate CCA technology features on unix platforms.
+
+2) To easily create new components.
+
+3) To accomplish (1,2) without possessing a deep understanding
+of Unix build processes, or 
+the babel tool, or
+the cca specification, or
+any particular graphical software development environment, or
+any programming language other than the user's favorite.
+In otherwords, the user must be able to avoid large time investments 
+in mere tools.
+
+4) To easily maintain component software, including both source and build process.
+4.0) linking. Dynamic or static linkage must be accomodated.
+4.1) extend. Quickly deriving new components from old must be supported.
+4.2) change. Changing the set of ports an existing component possesses.
+4.3) rename. Renaming (namespaces or class/interface names) for maintenance.
+4.4) integrate. Composing both the sources and build processes of components
+	into large, coherent collections must be supported. Included is the
+	ability to contain bocca projects in larger build processes, 
+	to integrate larger build processes within bocca projects, and
+	to build bocca projects by referring to external software installations.
+4.5) package. Bundling a component or integrated collection into easily
+	distributed formats must be supported.
+4.6) publish. Bocca should be able to find packaged components in public 
+	repositories (eventually).
+4.7) test. Maximally automated testing of both bocca tools and components
+	must be supported to provide confidence in the resulting simulations.
+4.8) relocate. Moving the source project across filesystems or operating systems
+	must be supported.
+
+5) To easily abandon bocca after an initial use while retaining usable
+	component code and build process code.
+
+
+
+Secondary needs (S):
+
+1) To easily upgrade a bocca project to newer versions of bocca.
+
+2) To substitute build processes based on build tools other than
+	handcrafted gnu make scripts. In particular, automake, cmake, and
+	scons are common in scientific computing.
+
+
+Derived functional requirements (F):
+
+1) The user must not be forced to repeat information if it can reasonably 
+	be avoided. Tedious repetition leads to poor first impressions.
+	This implies the tools are strongly context aware.
+	[supports P1, P2]
+
+2) The user must be able to create and use components in their primary
+	coding language with minimal understand of what babel does and
+	without understanding of the babel tool invocation arguments.
+	[supports P2, P3]
+
+3) The user must be able to easily export a component project out of the bocca
+	infrastructure.
+	[supports P5]
+
+4) The user must be assisted in maintaining consistency of source code and
+	build processes.
+	[supports P3, P4]
+
+5) A bocca project bundle must be environment independent, eliminating any 
+	bocca-derived binary dependencies, so that it can rebuilt elsewhere.
+	[supports P4.8]
+
+6) Filters must be provided for upgrading across major releases of bocca.
+	[supports S1]
+
+8) Bocca must me small enough that packaging it along with an integrated
+	set of components to ensure build portability would be acceptable 
+	to hpc package developers.
+	[supports P4.8]
+
+7) The user must be able to choose a build-process template when starting
+	a project.
+	[supports S2]
+
+
+
+Derived implementation requirements (I):
+
+1) Bocca must work on all CCA supported build platforms with minimal 
+	installation effort.
+	[supports P1]
+
+2) Bocca must be sidl symbol aware. Partially qualified symbols must be expanded
+	automatically from user input when unambiguous in context.
+	[supports F1, F4]
+
+3) Any internal representations that are not portable across variations in
+	environment (32v64 bit, python version, OS vendor) must be converted
+	to portable UTF8 representations when the bundling process is performed.
+	After relocation, no more (or less) than a reconfigure execution must
+	be needed to continue working on the bocca project.
+	[supports F5]
+
+
+
+Implementation choices (C):
+
+1) Bocca is implemented as python scripts compatible with python >= 2.3.
+	[supports I1]
+
+2) The connection to templated build processes must be one-way from bocca 
+	scripts, with at most a Unix error code coming back.
+	[supports S2]
+
+3) The bocca tools will be entirely command-line driven and scriptable.
+	[supports P3, P4.3]
+
+4) Every functionality of the bocca tools will provide command-line accessible
+	help documentation, independent of project context.
+	[supports P1,P2,P3]
+
+5) Where possible, standard python features will be used for maintainability.
+	This includes thus far optparse, configparser, distutils, and pickle.
+	[supports P3, P4.8, I1]
+
+
+
+Command-line features implementation (L):
+
+1 See file commands.txt.
+	[supports C3]
+
+
+Build features implementation (B):
+
+1 See file gmake.txt for the gmake-based build system.
+	[supports C2]

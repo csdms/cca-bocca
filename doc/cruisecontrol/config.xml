@@ -1,0 +1,42 @@
+<cruisecontrol>
+  <project name="bocca" buildafterfailed="true">
+    <!-- Bootstrappers are run every time the build runs,
+        *before* the modification checks -->
+    <bootstrappers>
+      <currentbuildstatusbootstrapper file="logs/bocca/buildstatus.txt"/>
+    </bootstrappers>
+
+    <!-- Defines where cruise looks for changes, to decide whether to run the build (time is in seconds) -->
+    <modificationset quietperiod="21600">
+      <svn localWorkingCopy="checkout/bocca" username="norris" password=""/>
+    </modificationset>
+
+    <!-- Configures the actual build loop, how often and which build file/target -->
+    <schedule interval="21600">
+      <ant antscript="/home/alice/software/apache-ant-1.7.0/bin/ant"
+           buildfile="bocca-cruisecontrol.xml"
+           target="check"
+           uselogger="true"
+           usedebug="false">
+           <property name="topdir" value="/disks/norris/bocca-cruisecontrol-2.7"/>
+           <property name="tracdir" value="/mcs/trac-plugin-data/TracCC/cca/bocca"/>
+           <property name="webdir" value="/mcs/www/cca/bocca/cruisecontrol"/>
+      </ant>
+    </schedule>
+
+    <!-- directory to write build logs to -->
+    <log dir="/mcs/trac-plugin-data/TracCC/cca/bocca"/>
+
+    <!-- Publishers are run *after* a build completes -->
+    <publishers>
+      <currentbuildstatuspublisher file="/mcs/www/cca/bocca/cruisecontrol/buildstatus.txt"/>
+      <email mailhost="mail.mcs.anl.gov" returnaddress="norris@mcs.anl.gov" buildresultsurl="http://www.mcs.anl.gov/cca/bocca/cruisecontrol" skipusers="true" spamwhilebroken="true">
+        <always address="norris@mcs.anl.gov"/>
+        <failure address="norris@mcs.anl.gov"/>
+      </email>
+      <artifactspublisher dir="checkout/bocca/build/output" dest="artifacts/bocca"/>
+      <artifactspublisher dir="checkout/bocca/build/output" dest="/mcs/www/cca/bocca/cruisecontrol/artifacts"/>
+    </publishers>
+  </project>
+</cruisecontrol>
+

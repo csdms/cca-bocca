@@ -1,0 +1,38 @@
+Congratulations!  You have created a Bocca project.  If you want to
+see if your project acquired the defaults, look in BOCCA/ for the
+defaults file: "<project name>.defaults".
+
+To create an empty component "cd" into the directory where you found
+this file and type:
+
+$ bocca create component componentSIDLName  
+
+the resulting component will have no Uses nor Provides Ports but it
+will load in a CCA compliant framework like Ccaffeine (and do pretty
+much nothing).  More meaningful components can be created by using
+some of the many options that "create component" provides.  For more
+info type:
+
+$ bocca create component --help
+
+After creating a component type:
+
+$ ./configure; make; make check
+
+This will compile your component and load it into Ccaffeine as a check.
+
+You can customize the bocca-provided configure.ac script by defining new 
+m4 macros in the config subdirectory and adding them to the top-level
+configure.ac script. After modifying configure.ac, you can regenerate the 
+configure script with the following commands in the top-level project 
+directory:
+
+$ aclocal -I config
+$ autoconf 
+
+Note that autoconf version >= 2.60 is required. New variables set by 
+your configure should generally be added to the top-level make.project.in 
+file, which is included in all other makefiles.
+
+Good luck!
+

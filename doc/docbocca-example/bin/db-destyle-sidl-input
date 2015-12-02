@@ -1,0 +1,19 @@
+#!/bin/sh
+# script to strip ^..texbegin, ^..texend lines.
+# $1 input file. Input file is replaced.
+if test -d $1; then 
+	echo "$0: $1 is a directory"
+	exit 1
+fi
+dir=`dirname $1`
+if test -w $dir; then
+	if test -w $1; then 
+		cat $1 | grep -v '^..texbegin' | grep -v '^..texend' > $1.tmp
+		mv -f $1.tmp $1
+		exit 0
+	else
+		echo  "$0: Cannot create write to file: $1"
+	fi
+	echo  "$0: Cannot create scratch file: $1.tmp in $dir"
+fi
+exit 1

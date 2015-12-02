@@ -1,0 +1,5 @@
+; # a template project metadata file that sits at the top of a project tree.
+; # Tells us where (relative) to look for additional .bocca
+; # database dirs. Every other line in this file is a relative directory name.
+; # Particularly not in this file is anything about the system or bocca itself.
+.

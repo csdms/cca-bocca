@@ -1,0 +1,10 @@
+#!/bin/sh
+echo "Dummy impl passed: $*"
+echo "env(BOCCA_BIN) = " $BOCCA_BIN
+echo "env(BOCCA_PROJECT_EXISTS) = " $BOCCA_PROJECT_EXISTS
+echo "env(BOCCA_PROJECT) = " $BOCCA_PROJECT
+echo "env(BOCCA_PROJECT_TOP) = " $BOCCA_PROJECT_TOP
+echo "env(BOCCA_DEBUG) = " $BOCCA_DEBUG
+echo "env(PATH) = " $PATH
+echo "env(PYTHONPATH) = " $PYTHONPATH
+exit 0

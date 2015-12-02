@@ -1,0 +1,10 @@
+varlist
+config.log
+config.status
+build
+autom4te.cache
+install
+Makefile
+aclocal.m4
+test/cca/Makefile
+

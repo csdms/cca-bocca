@@ -1,0 +1,80 @@
+BUILD:
+
+To build bocca, it must be configured first. setup.py will not
+work properly without configure.
+
+
+	./configure --with-ccafe-config=whereever
+	make
+(The prefix defaults to pwd/install and install is done by make always
+unless you specify make build instead.)
+
+Note (bocca developers only): If any new ac macros are added or existing ones 
+modified in the config/ subdirectory, regenerate configure first: 
+	./aclocal -I config
+	./autoconf
+or run ./genconfig.
+
+Developers only: To refresh the version information, after configuring, do:
+	make version
+
+You now have a working bocca installed in `pwd`/install/bin.
+Add that to your path. You do not need to add anything to
+your PYTHONPATH, normally.
+
+INTERESTING CONFIGURE OPTIONS:
+
+--prefix=/install/root/location
+	This must be specified to configure if the default is not wanted.
+	Specifying --prefix independently to setup.py 
+	is *not* supported and will not work.
+
+USE:
+
+You can perform tests and see examples by invoking:
+	make check
+and then examining
+	test/cl/*.out
+and
+	test/cl/scratch/*
+
+The command line examples are in test/cl/test*.sh
+Some other examples are also in test/cca/*.sh
+
+
+TROUBLE:
+
+Please send general use questions to help@cca-forum.org.
+
+Please post bug reports to the tracker above or
+mail them to bocca-dev@cca-forum.org.
+
+
+LICENSE:
+
+The exact license isn't worked out yet. Whatever it is
+will be some form of open-source license no more
+restrictive than the LGPL. For more information, see
+proposed.LICENSE.bocca.txt.
+
+
+DIRECTORY LAYOUT (for developers):
+
+scripts/ is the home of standalone scripts that might be installed in $prefix/bin.
+boccalib/ is the home of python modules.
+
+boccalib/cct/ is the home of subjects, and example.py is a stub for copy
+and modify to generate new subjects.
+
+boccalib/templates is the family of templates involved.
+They are grouped by directory and versioned as necessary.
+
+Additional templates (new babels, new build system variants like one with autotools)
+go in additional subdirectories of templates/.
+
+Additional language dialects (if you don't like the default
+sidl and impl writers) can be added, following the cio 
+dialect of cxxWriter example.
+
+Additional languages can be added when babel supports them.
+

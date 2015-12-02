@@ -1,0 +1,20 @@
+        subroutine pytest_g_setServices_fi(self, services, exception)
+        implicit none
+C        in pytest.g self
+        integer*8 self
+C        in gov.cca.Services services
+        integer*8 services
+C        out sidl.BaseInterface exception
+        integer*8 exception
+
+C       DO-NOT-DELETE splicer.begin(pytest.g.setServices)
+C       bocca-default-code. User may edit or delete.begin(pytest.g.setServices)
+
+        call pytest_g_boccaSetServices_f(
+     & self, services, exception)  
+C FIXME need to check and propagate exception here.
+
+
+C       bocca-default-code. User may edit or delete.end(pytest.g.setServices)
+C       DO-NOT-DELETE splicer.end(pytest.g.setServices)
+        end

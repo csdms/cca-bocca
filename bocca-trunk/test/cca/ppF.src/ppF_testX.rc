@@ -1,0 +1,14 @@
+#!ccaffeine bootstrap file. 
+# ------- don't change anything ABOVE this line.-------------
+path set /home/baallan/cca/build/bocca/trunk/test/cca/pp/components/lib
+
+#ppF.testX#
+
+repository get-global ppF.testX
+instantiate ppF.testX ppF_testX
+display component ppF_testX
+go ppF_testX go
+display component ppF_testX
+config ppF_testX PP_1 ALL
+remove ppF_testX
+quit

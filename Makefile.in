@@ -1,0 +1,102 @@
+#
+# define the following variables differently if they don't
+# work for your installation by using configure switches.
+#
+
+BOCCA_VERSION=@BOCCA_VERSION@
+BOCCA_RELEASE=@BOCCA_RELEASE@
+PYTHON=@PYTHON@
+CCA_BUNDLE_VERSION=@CCA_BUNDLE_VERSION@
+BABEL_CONFIG=@BABEL_CONFIG@
+SHELL=@SHELL@
+RUBY=@RUBY@
+JAVA=@JAVA@
+JAVAC=@JAVAC@
+CXX=@CXX@
+HAVE_BABEL=@HAVE_BABEL@
+HAVE_PYTHON=@HAVE_PYTHON@
+HAVE_RUBY=@HAVE_RUBY@
+HAVE_JAVA=@HAVE_JAVA@
+PATH_SEPARATOR=@PATH_SEPARATOR@
+PACKAGE_NAME=@PACKAGE_NAME@
+PACKAGE_TARNAME=@PACKAGE_TARNAME@
+PACKAGE_VERSION=@PACKAGE_VERSION@
+PACKAGE_STRING=@PACKAGE_STRING@
+PACKAGE_BUGREPORT=@PACKAGE_BUGREPORT@
+SVN=@SVN_EXECUTABLE@
+
+# if you do not set PREFIX, INSTALL_OPTS, it tries to pollute your python distribution.
+PREFIX=@prefix@
+INSTALL_OPTS= --prefix=$(PREFIX)
+
+# typically no build opts needed.
+BUILD_OPTS= 
+
+VERSION_FILE=boccalib/boccaversion.py
+
+# ------------------------- # -------------------------
+
+all: checklocal build install
+
+checklocal:
+	@if test -f setup.py -a -d scripts; then \
+		echo "OK, we are in the source tree." ; \
+	else \
+		echo "You *must* be in the source tree to build bocca. Build will now fail." ; \
+		exit 1 ; \
+	fi
+
+build:
+	$(PYTHON) setup.py build $(BUILD_OPTS)
+
+install: 
+	@echo installing in $(PREFIX)
+	$(PYTHON) setup.py install $(INSTALL_OPTS)
+
+install-dev: version
+	@echo installing in $(PREFIX)
+	$(PYTHON) setup.py install $(INSTALL_OPTS)
+
+test-cl:
+	(cd test/cl; $(MAKE))
+
+test-one:
+	(cd test/cl; $(MAKE) one)
+
+clean:
+	$(RM) -r build install MANIFEST
+	(cd test; $(MAKE) clean)
+	(cd scripts; $(MAKE) clean)
+
+check: test-cl
+
+distclean: clean
+	$(RM) config.log config.status varlist Makefile MANIFEST
+
+version: 
+	@if [ "x$(SVN)" != "x" ]; then \
+		revnumber=`$(SVN) info -r HEAD | grep 'Revision:' | sed -e 's|^.*: ||'`; \
+		lastchanged=`$(SVN) info -r HEAD | grep 'Last Changed Date:' | sed -e 's|^.*: ||'`; \
+		if [ "x$$revnumber" != "x" ] && [ "x$$lastchanged" != "x" ]; then \
+			sed -e "s|@BOCCA_VERSION_NUM@|$(BOCCA_VERSION)|" \
+				-e "s|@SVN_REVISION@|$$revnumber|" \
+				-e "s|@SVN_DATE@|$$lastchanged|" \
+				-e "s|@BOCCA_RELEASE_NAME@|$(BOCCA_RELEASE)|" \
+				$(VERSION_FILE).in > $(VERSION_FILE); \
+		fi; \
+	fi
+
+
+# Note python automatically ignores all the cruft, packaging
+# only what is specifically handled in setup.py.
+# Both of these packaging targets are currently broken,
+# due to a known distutils bug that is expected to be fixed
+# soon. package_data is improperly ignored.
+
+create-dist dist:
+	$(PYTHON) setup.py sdist
+
+rpm:
+	$(PYTHON) setup.py bdist --format=rpm
+
+.PHONY: install version build dist

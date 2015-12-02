@@ -1,0 +1,3 @@
+#!/bin/sh
+echo "M $* P"
+exit 0

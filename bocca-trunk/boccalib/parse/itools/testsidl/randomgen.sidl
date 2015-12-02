@@ -1,0 +1,13 @@
+package randomgen version 1.0 {
+
+  interface RandomGeneratorPort extends gov.cca.Port
+  {
+        // DO NOT DELETE bocca.splicer.begin(randomgen.RandomGeneratorPort)
+        // Insert your port methods here
+
+    double getRandomNumber();
+
+         // DO NOT DELETE bocca.splicer.end(randomgen.RandomGeneratorPort)
+ }
+
+}

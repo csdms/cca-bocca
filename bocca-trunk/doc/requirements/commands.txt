@@ -1,0 +1,42 @@
+
+The pattern is 
+	bocca [options] verb subject [suboptions] [positional arguments] 
+
+The verbs are like:
+
+create rename change remove etc
+
+The subjects generally are sidl entity or build artifact types.
+
+port, component, interface, class, ...
+
+(bocca create project P; cd P; bocca help) gives the current lists.
+
+Here's the chart of currently supported combinations.
+
+                      d               w
+              c   r   i   r   c   e   h   c   e   c   d
+              r   e   s   e   h   d   e   o   x   o   i
+              e   n   p   m   a   i   r   n   p   p   f
+              a   a   l   o   n   t   e   f   o   y   f
+              t   m   a   v   g       i   i   r   
+              e   e   y   e   e       s   g   t
+            +---+---+---+---+---+---+---+---+---+---+---+
+interface   | * | * | * | * | * | * | * | R | R | * | R |
+port        | * | * | * | * | * | * | * | R | R | * | R |
+sidlclass   | * | * | * | R | * | * | * | R | R | * | R |
+component   | * | * | * | R | * | * | * | R | R | * | R |
+package     | * | R | * | R | * | X | X | R | R | X | R |
+project     | * | * | * | X | X | X | X | * | R | X | R |
+port inst   | * | R | X | * | R | X | X | R | X | X | X |
+application |   |   |   |   |   |   |   |   |   |   | R |
+
+	* = draft done
+	X = combination not expected to be supported.
+	R = needed for "production/robust" but not done.
+
+We need another table of planned arguments and options
+for each combination in the above grid, annotated with schedule info.
+Less the schedule info, the bocca bug tracker is essentially
+the tool that helps us manage this table.
+

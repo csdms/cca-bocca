@@ -1,0 +1,462 @@
+# This file contains common makefile elements for building SIDL-based
+# multi-language applications, including CCA components. Prerequisites are 
+# Babel and a recent version of the CCA tools.
+#
+# The directory organization follows the Bocca conventions: all client code is 
+# generated in the ports subdirectory, while all implementations (server code) is 
+# in the components directory. So all interfaces are in ports (whether they are 
+# ports or not), and all classes (components or just classes) are in components/.
+#
+# This file should not normally be modified by users; if you encounter problems
+# please email cca-help@cca-forum.org.
+
+# Top-level project directory
+PROJECT_TOP_DIR=@PROJECT_TOP_DIR@
+BOCCA_IO_FLAGS=@BOCCA_IO_FLAGS@
+CCASPEC_GENCCAXML=@CCASPEC_GENCCAXML@
+
+# Check whether configure was run:
+ifeq ($(shell if test -f $(PROJECT_TOP_DIR)/utils/config-data ; then echo "0"; else echo "1"; fi),1)
+    $(error "Please run configure in the top-level directory before invoking make")
+endif
+
+# User-specified and configure-generated project-spedific settings
+ifeq ($(shell if test -f $(PROJECT_TOP_DIR)/make.project ; then echo "0"; else echo "1"; fi),0)
+    include $(PROJECT_TOP_DIR)/make.project
+else    
+    $(error "Please run configure in the top-level directory before invoking make")
+endif
+
+ifeq ($(shell if test -f $(PROJECT_TOP_DIR)/make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include $(PROJECT_TOP_DIR)/make.vars.user
+else    
+    $(error "$(PROJECT_TOP_DIR)/make.vars.user is missing")
+endif
+
+# Make sure all is the first target
+default: all
+
+# A TMP variable to be used for compiling F90 files
+TMP := $(shell echo $$$$)
+
+ifndef MYDIR
+    MYDIR := $(shell bash -c "pwd -P")
+endif
+
+ifndef DEPL_TOP_DIR
+    DEPL_TOP_DIR = $(PROJECT_TOP_DIR)/depl
+endif
+
+ifndef COMPONENT_TOP_DIR
+    COMPONENT_TOP_DIR = $(PROJECT_TOP_DIR)/components
+endif
+ifeq ($(shell if test -f $(COMPONENT_TOP_DIR)/make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include $(COMPONENT_TOP_DIR)/make.vars.user
+else    
+    $(error "$(COMPONENT_TOP_DIR)/make.vars.user is missing")
+endif
+ifndef PORT_TOP_DIR
+    PORT_TOP_DIR = $(PROJECT_TOP_DIR)/ports
+endif
+ifndef COMPONENT_CLIENTS_TOP_DIR
+    COMPONENT_CLIENTS_TOP_DIR = $(COMPONENT_TOP_DIR)/clients
+endif
+ifndef EXTERNAL_TOP_DIR
+    EXTERNAL_TOP_DIR = $(PROJECT_TOP_DIR)/external
+endif
+
+# Variables for support of local install and regular install
+ifeq ($(MAKECMDGOALS),install)
+    INSTALL_TARGET := install
+endif
+ifeq ($(MAKECMDGOALS),install-check)
+    INSTALL_TARGET := install-check
+endif
+ifndef INSTALL_TARGET
+    INSTALL_TARGET := install_local
+endif
+ifndef LOCAL_INSTALL_PREFIX
+    LOCAL_INSTALL_PREFIX = $(PROJECT_TOP_DIR)/install
+endif
+ifneq ($(INSTALL_TARGET),install_local)
+    PREFIX:=$(prefix)
+    INSTALL_LIB_DIR=$(libdir)
+    INSTALL_INCLUDE_DIR=$(includedir)/$(PROJECT_NAME)
+    INSTALL_DATA_DIR=$(datarootdir)
+else
+    PREFIX=$(LOCAL_INSTALL_PREFIX)
+    INSTALL_LIB_DIR=$(LOCAL_INSTALL_PREFIX)/lib
+    INSTALL_INCLUDE_DIR=$(LOCAL_INSTALL_PREFIX)/include
+    INSTALL_DATA_DIR=$(LOCAL_INSTALL_PREFIX)/share
+endif
+
+# Clients don't have a glue/ subdirectory
+ifeq ($(CLIENT_BUILD),1)
+    GLUEDIR=
+else
+    GLUEDIR=glue/
+endif
+
+# Locations of SIDL files within project
+vpath %.sidl $(PORT_TOP_DIR)/sidl $(COMPONENT_TOP_DIR)/sidl $(EXTERNAL_TOP_DIR)/sidl
+
+# Various project directories
+UTILS_DIR := $(PROJECT_TOP_DIR)/buildutils
+COMPONENT_SIDL_DIR := $(COMPONENT_TOP_DIR)/sidl
+PORT_SIDL_DIR := $(PORT_TOP_DIR)/sidl
+COMPONENT_CLIENTS_SIDL_DIR := $(COMPONENT_TOP_DIR)/sidl
+EXTERNAL_SIDL_DIR := $(EXTERNAL_TOP_DIR)/sidl 
+
+# Colors for user-friendlier output
+ifeq ($(USE_COLORS),1)
+RED=\033[1;31m
+GREEN=\033[1;32m
+YELLOW=\033[1;33m
+BLUE=\033[1;34m
+MAGENTA=\033[1;35m
+CYAN=\033[1;36m
+BLACK=\033[0m
+MYCOLOR=$(BLUE)
+endif 
+
+# A makefile segment describing the installation of the CCA specification
+CCA_SPEC_VARS=$(shell $(CCAFE_CONFIG) --var CCAFE_BABEL_CCA_CONFIG)
+include $(CCA_SPEC_VARS)
+CCAFE_EXEC = $(shell $(CCAFE_CONFIG) --var CCAFE_SINGLE)
+
+# User-specified settings in components/ or ports/ or external/
+ifeq ($(shell if test -f $(PROJECT_TOP_DIR)/make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include $(PROJECT_TOP_DIR)/make.vars.user
+endif
+
+RELPATH := $(subst $(PROJECT_TOP_DIR)/,,$(MYDIR))
+TOP_RELATIVE_DIR := $(shell echo "$(RELPATH)" | sed -e 's|/.*||')
+ifndef LOCAL_PREFIX
+    LOCAL_PREFIX = $(PROJECT_TOP_DIR)/$(TOP_RELATIVE_DIR)
+endif
+
+# User-specified settings in components/ or ports/ or external/
+ifeq ($(shell if test -f $(PROJECT_TOP_DIR)/$(TOP_RELATIVE_DIR)/make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include $(PROJECT_TOP_DIR)/$(TOP_RELATIVE_DIR)/make.vars.user
+endif
+
+# User-specified settings at the lowest level, i.e., current directory (individual components or clients)
+ifeq ($(shell if test -f make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include make.vars.user
+endif
+
+# Allow user to override languages with configure or project.make
+ifeq ($(USER_LANGUAGES), )
+  USER_LANGUAGES = $(CCASPEC_BABEL_LANGUAGES)
+endif
+
+# Make sure that we don't try to use user-specified languages not supported by Babel
+ifndef INSTALL_LANGUAGES
+    INSTALL_LANGUAGES = $(CCASPEC_BABEL_LANGUAGES)
+endif
+INSTALL_LANGUAGES_COMMA = $(shell  echo $(INSTALL_LANGUAGES)| sed -e 's/ /,/g')
+LANGUAGES = $(shell $(UTILS_DIR)/getLanguages.sh '${USER_LANGUAGES}' '${CCASPEC_BABEL_LANGUAGES}')
+
+COMPONENT_LANGUAGES = $(shell if test -f $(COMPONENT_TOP_DIR)/make.components; then grep "LANGUAGES = " $(COMPONENT_TOP_DIR)/make.components | sed -e 's|LANGUAGES = *||'; fi)
+SUPPORTED_COMPONENT_LANGUAGES = $(shell $(UTILS_DIR)/getLanguages.sh '${COMPONENT_LANGUAGES}' '${LANGUAGES}')
+SUPPORTED_COMPONENT_LANGUAGES_COMMA = $(shell  echo $(SUPPORTED_COMPONENT_LANGUAGES)| sed -e 's/ /,/g')
+
+# Variables for the client builds (ports, external, components)
+ifndef CLIENT_MAKE_SNIPPET
+    CLIENT_MAKE_SNIPPET=$(UTILS_DIR)/make.symbols
+endif
+
+# Include the file containing the list of interfaces and ports (or whatever clients are specified)
+ifeq ($(shell if test -f $(CLIENT_MAKE_SNIPPET) ; then echo "0"; else echo "1"; fi),0)
+    include $(CLIENT_MAKE_SNIPPET)
+endif
+
+ifndef CLIENT_LANGUAGES
+    ifneq ($(SUPPORTED_COMPONENT_LANGUAGES),)
+        CLIENT_LANGUAGES=$(SUPPORTED_COMPONENT_LANGUAGES)
+    else
+        CLIENT_LANGUAGES=$(LANGUAGES)
+    endif
+endif
+
+# Dependencies on project entities not in my top directory (e.g., component clients dependences on ports)
+# The INTERFACE_DEPS and CLASS_DEPS variables are defined in the buildutils/make.symbols file (generated by the builder plugin)
+ifneq ($(EXTERNAL_BUILD),1)
+ifneq ($(INTERFACE_DEPS),)
+ifneq ($(PORT_BUILD),1)
+    INTERFACES:=$(sort $(INTERFACE_DEPS))
+    PORT_SIDL_FILES := $(addprefix $(PORT_TOP_DIR)/sidl/,$(addsuffix .sidl,$(INTERFACES)))
+    PORT_LIB_TARGETS := $(strip $(sort $(foreach lang,$(CLIENT_LANGUAGES),$(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(PORT_TOP_DIR) $(lang) $(INTERFACES)))))
+endif
+endif
+ifneq ($(CLASS_DEPS),)
+ifeq ($(CLIENT_BUILD),1)
+    PREREQ_CLASSES:=$(sort $(CLASS_DEPS))
+    CLASS_SIDL_FILES := $(addprefix $(COMPONENT_TOP_DIR)/sidl/,$(addsuffix .sidl,$(PREREQ_CLASSES)))
+    CLASS_LIB_TARGETS := $(strip $(sort $(foreach lang,$(CLIENT_LANGUAGES),$(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(COMPONENT_CLIENTS_TOP_DIR) $(lang) $(PREREQ_CLASSES)))))
+endif
+endif
+ifneq ($(CLASS_CLASS_DEPS),)
+ifeq ($(SERVER_BUILD),1)
+    PREREQ_CLASSES:=$(sort $(CLASS_CLASS_DEPS))
+    CLASS_SIDL_FILES := $(addprefix $(COMPONENT_TOP_DIR)/sidl/,$(addsuffix .sidl,$(PREREQ_CLASSES)))
+    CLASS_LIB_TARGETS := $(strip $(sort $(foreach lang,$(CLIENT_LANGUAGES),$(shell $(UTILS_DIR)/getLibPath.sh client $(INSTALL_TARGET) $(COMPONENT_CLIENTS_TOP_DIR) $(lang) $(PREREQ_CLASSES)))))
+endif
+endif
+endif
+
+# Location of CCA spec headers (in include/)  and library (in lib/) files
+CCA_SPEC_CLIENTS = $(CCASPEC_INSTALL_DIR)
+
+PYTHON = $(CCASPEC_BABEL_PYTHON)
+PYTHON_VER = python$(CCASPEC_BABEL_PYTHON_VERSION)
+LIBTOOL=$(CCASPEC_BABEL_BABEL_LIBTOOL)
+
+INSTALL = $(HIDE_LIBTOOL)$(LIBTOOL) --mode=install install
+
+# A few babel-config queries
+INSTALL_DATA = $(shell $(CCASPEC_BABEL_BABEL_CONFIG) --query-var=INSTALL_DATA)
+BABEL_CONFIG_VERSION = $(shell $(CCASPEC_BABEL_BABEL_CONFIG) --version)
+
+# Control level of output from user-defined rules in various make.rules.user files
+# When set to :, output is suppressed
+SILENT_HOOKS=:
+
+# Default flags to invocations of make from our makefiles
+CCA_MAKEFLAGS= --no-print-directory --no-builtin-rules
+
+# Control the verbosity of the build output using the VERBOSE, DEBUG, HIDE_COMPILE, and HIDE_LIBTOOL variables
+# If the HIDE_COMPILE variable is set, hide the output of commands (stdout only)
+
+ifneq ($(HIDE_COMPILE),)
+    OUT_REDIRECT= > /dev/null
+    DEBUG=
+else
+    OUT_REDIRECT=
+    QUIET=
+    DEBUG=1
+endif
+ifneq ($(DEBUG),)
+    QUIET=
+    SILENT_HOOKS=
+    CCA_MAKEFLAGS = --no-builtin-rules
+endif
+ifeq ($(VERBOSE),1)
+    HIDE_LIBTOOL=
+    SILENT_HOOKS=
+    QUIET=
+    CCA_MAKEFLAGS = --no-builtin-rules
+else
+    ifdef VERBOSE
+        HIDE_LIBTOOL=
+        HIDE_COMPILE=
+        SILENT_HOOKS=
+        QUIET=
+        CCA_MAKEFLAGS = --no-builtin-rules
+    endif
+endif
+ifndef dprint
+    dprint:=@$(SILENT_HOOKS) echo "" 
+endif
+	
+
+# User-provided external symbols from project.make (in an xml repository)
+ifneq ($(EXTERNAL_XML_SYMBOLS),)
+   EXTERNAL_SYMBOLS_TARGETS = $(addprefix ., $(EXTERNAL_XML_SYMBOLS))
+endif
+
+# Location of external XML repositories generated by Babel
+XML_REP = $(USER_XML) $(addprefix -R,$(EXTERNAL_XML_REPO))
+
+# Babel executable
+BABEL   = $(CCASPEC_BABEL_BABEL)
+ifndef EXTRA_BABEL_OPTIONS
+    EXTRA_BABEL_OPTIONS=
+endif
+
+# Location of sidl.sidl
+SIDL_SIDL = $(CCASPEC_BABEL_jardir)/sidl.sidl
+
+# Location of cca.sidl
+CCA_SIDL = $(CCASPEC_pkgdatadir)/cca.sidl
+
+ifdef CLIENT_BUILD
+    ifeq ($(shell if test -f babel.make ; then echo "0"; else echo "1"; fi),0)
+        include babel.make
+    endif
+# Not including babel.make.depends for clients since the syntax is in correct for F90 in Babel 1.0.4
+# It is used in server builds since the combineBabelMakes.sh script fixes this problem.
+#    ifeq ($(shell if test -f babel.make.depends ; then echo "0"; else echo "1"; fi),0)
+#        include babel.make.depends
+#    endif
+endif
+
+## ***************************************************************
+## *      Compilers and flags for the different languages        * 
+## ***************************************************************
+
+ALL_INCLUDES += $(INCLUDES) $(components_INCLUDES) $(project_INCLUDES) \
+    -I$(INSTALL_INCLUDE_DIR) \
+    -I$(MYDIR) \
+    -I$(CCASPEC_BABEL_includedir) \
+    -I$(CCASPEC_includedir) -I$(CCASPEC_pkgincludedir)/$(LANGUAGE) \
+    -I$(MYDIR)/glue
+
+# The following variables extract configuration information from the 
+# installed CCA specification (with Babel support)
+ifneq ($(MPICXX),)
+  CXX = $(MPICXX)
+else
+  CXX = $(CCASPEC_BABEL_CXX)
+endif
+CXXFLAGS += $(CCASPEC_BABEL_CXXFLAGS) -I$(CCASPEC_BABEL_includedir)/cxx \
+        -I$(CCASPEC_pkgincludedir)/cxx
+
+CC = $(CCASPEC_BABEL_CC)
+CFLAGS += $(CCASPEC_BABEL_CFLAGS) 
+
+F77 = $(CCASPEC_BABEL_F77)
+F77FLAGS = $(FCFLAGS) $(CCASPEC_BABEL_FFLAGS) -I. -I$(CCASPEC_pkgincludedir)/f77 \
+      -I$(PORT_TOP_DIR)/include -I$(COMPONENT_TOP_DIR)/clients/include
+
+# Some Fortran-specific C headers needed for compiling C glue code are in the f77 subdirectory
+ifeq ($(LANGUAGE),f77)
+    CFLAGS += -I$(CCASPEC_BABEL_includedir)/f77
+    CCA_LIBS += $(CCASPEC_BABEL_FLIBS)
+endif
+
+#libtool definition for alllibs
+CCA_LIBS = $(LIBS) 
+
+PYTHON_MODINC = $(CCASPEC_pkgincludedir)/$(PYTHON_VER):\
+$(CCASPEC_BABEL_PYTHONINC):\
+$(CCASPEC_BABEL_includedir):\
+$(CCASPEC_pkgincludedir)/c:\
+$(INSTALL_INCLUDE_DIR):\
+$(CCASPEC_BABEL_includedir)/$(PYTHON_VER)/babel:\
+$(INSTALL_INCLUDE_DIR)/$(PYTHON_VER)/babel:
+ifneq ($(CCASPEC_BABEL_INCLUDES_PY),)
+  PYTHON_MODINC+=$(CCASPEC_BABEL_INCLUDES_PY):
+  PYTHON_INCPATHS=$(shell echo $(CCASPEC_BABEL_INCLUDES_PY) | sed -e 's|:| -I|g')
+  CCASPEC_BABEL_PYTHON_INCDIRS=--include-dirs=$(shell echo $(CCASPEC_BABEL_INCLUDES_PY) | sed -e 's|:| --include-dirs=|g')
+endif
+PYTHON_MODINC+=$(CCASPEC_BABEL_PYTHONINC:-I%=%):.:glue
+
+
+# Make sure no -I's exist in the list of include paths
+ALLPYTHON_MODINC = $(shell echo $(PYTHON_MODINC) | sed -e 's/-I//g' -e 's/ /:/g' -e s'/::*/:/g')
+ifneq ($(LANGUAGE),python)
+    CCA_LIBS += -R$(CCASPEC_pkglibdir) -L$(CCASPEC_pkglibdir) -lcca-$(LANGUAGE)
+else
+    # Python-specific settings
+    ALL_INCLUDES += -I$(CCASPEC_BABEL_includedir)/$(PYTHON_VER)/babel \
+        -I$(CCASPEC_pkgincludedir)/$(PYTHON_VER)/  $(PYTHON_INCPATHS) \
+        -I$(CCASPEC_pkgincludedir)/$(PYTHON_VER)/babel \
+        -I$(INSTALL_INCLUDE_DIR) -I$(INSTALL_INCLUDE_DIR)/$(PYTHON_VER)/babel 
+    CCA_LIBS +=  -R$(CCASPEC_BABEL_PYTHON_SHARED_LIBRARY_DIR) \
+        -L$(CCASPEC_BABEL_PYTHON_SHARED_LIBRARY_DIR) -l$(PYTHON_VER) \
+        $(EXTRA_PYTHON_LIBS)
+    # The following check is needed due to differences in post 1.0 Babel releases
+    ifeq ($(PYTHONINC_NO_DASH_I),$(CCASPEC_BABEL_PYTHONINC))
+        ALL_INCLUDES += -I$(CCASPEC_BABEL_PYTHONINC) 
+    else
+        ALL_INCLUDES += $(CCASPEC_BABEL_PYTHONINC)  
+    endif
+    ifneq ($(COMPONENT),)
+        SETUP_PY=.$(COMPONENT).setup.py
+    else
+        SETUP_PY=setup.py
+    endif
+endif
+
+# Libtool tag  for the different languages (CXX by default)
+TAG=--tag=CXX
+
+# The CCA spec and SIDL runtime libraries (the shared lib is used below because libtool
+# doesn't work as expected if we just do -lcca on a Mac)
+CCA_LIBS += -R$(CCASPEC_pkglibdir) -L$(CCASPEC_pkglibdir) $(CCASPEC_LIB_L_DIR)/$(CCASPEC_SHARED_LIB) \
+    -R$(CCASPEC_BABEL_libdir) -L$(CCASPEC_BABEL_libdir) -lsidl
+
+ifeq ($(LANGUAGE),java)
+    JAVA_INC = $(shell $(CCASPEC_BABEL_BABEL_CONFIG) --query-var=JNI_INCLUDES)
+    ALL_INCLUDES += $(JAVA_INC) -I$(CCASPEC_BABEL_includedir)/java
+    JAVASRCS = $(shell find $(MYDIR) -name '*.java')
+    SIDLSTUBS_JAR = $(CCASPEC_BABEL_libdir)/sidlstub_$(BABEL_CONFIG_VERSION).jar
+    SIDL_JAR = $(CCASPEC_BABEL_libdir)/sidl-$(BABEL_CONFIG_VERSION).jar
+    JAVA_CP= -classpath $(CCASPEC_LIB_L_DIR)/cca-spec.jar:$(SIDL_JAR):$(SIDLSTUBS_JAR):$(INSTALL_LIB_DIR)/java:.:$(CLASSPATH_USER)
+    JAVA_OBJS += $(JAVASRCS:.java=.class)
+endif
+
+# Extract information from Babel-generated makefile segments
+# Babel "glue" code (IOR, Stubs, Skels) is in the glue/ subdirectory
+SRCS = $(IORSRCS) $(IMPLSRCS) $(STUBSRCS) $(SKELSRCS)
+OBJS = $(IORSRCS:.c=.lo) 
+ifeq ($(LANGUAGE),f77)
+    IMPLOBJS = $(IMPLSRCS:.f=.lo)
+    OBJS += $(IMPLSRCS:.f=.lo) 
+#    TAG=--tag=F77 
+else 
+    ifneq ($(LANGUAGE),f90)
+        # F90 is handled separately later
+        IMPLOBJS = $(IMPLSRCS:.$(LANGUAGE)=.lo) 
+        OBJS += $(IMPLSRCS:.$(LANGUAGE)=.lo)
+        ifeq ($(LANGUAGE),cxx)
+             IMPLHDRS = $(IMPLSRCS:.cxx=.hxx)
+             SKELOBJS = $(SKELSRCS:.cxx=.lo)
+        endif
+        ifeq ($(LANGUAGE),c)
+             IMPLHDRS = $(IMPLSRCS:.c=.h)
+        endif
+    endif
+endif
+
+ifeq ($(LANGUAGE),python)
+    SRCS += $(LAUNCHSRCS)
+    OBJS += $(LAUNCHSRCS:.c=.lo)
+endif
+ifeq ($(LANGUAGE),f90)
+# this may need fixing when libtool supports f90 compilers.
+    F90 = $(CCASPEC_BABEL_F90)
+    F90FLAGS += $(FCFLAGS) $(INCLUDES)\
+        $(CCASPEC_BABEL_F90MFLAG) . $(CCASPEC_BABEL_F90FLAGS) \
+        $(CCASPEC_BABEL_F90MFLAG) $(CCASPEC_pkgincludedir)/f90 \
+        $(CCASPEC_BABEL_F90MFLAG) $(CCASPEC_BABEL_includedir)/f90 \
+        $(CCASPEC_BABEL_F90MFLAG) $(INSTALL_INCLUDE_DIR) \
+        $(USER_F90FLAGS)
+    ALL_INCLUDES += -I$(CCASPEC_pkgincludedir)/f90 -I$(CCASPEC_BABEL_includedir)/f90
+# Some Fortran-specific C headers needed for compiling glue code are in the f90 subdirectory
+    CFLAGS += -I$(CCASPEC_BABEL_includedir)/f90
+# The "glue" code (IOR, stubs, skels) for F90 (dependency explicitly specified later!)
+    F90_SRCS=$(ARRAYMODULESRCS) $(IMPLMODULESRCS) $(TYPEMODULESRCS) $(STUBMODULESRCS)
+    F90ARRAYMOD_OBJS = $(strip $(ARRAYMODULESRCS:.F90=.lo))
+    F90IMPL_OBJS = $(strip $(IMPLSRCS:.F90=.lo))
+    F90MOD_OBJS = $(strip $(IMPLMODULESRCS:.F90=.lo))
+    F90TYPE_OBJS = $(strip $(TYPEMODULESRCS:.F90=.lo))
+    F90STUB_OBJS = $(strip $(STUBMODULESRCS:.F90=.lo))
+    F90_OBJS = $(F90TYPE_OBJS) $(F90STUB_OBJS) $(F90MOD_OBJS) $(F90ARRAYMOD_OBJS) $(F90IMPL_OBJS)
+    CCA_LIBS += $(CCASPEC_BABEL_F90LIBS)
+#    TAG=--tag=FC
+endif    #-------------------------------- f90 
+
+ifeq ($(LANGUAGE),cxx)
+    OBJS += $(STUBSRCS:.cxx=.lo) $(SKELSRCS:.cxx=.lo)
+else
+    OBJS += $(STUBSRCS:.c=.lo) $(SKELSRCS:.c=.lo)
+endif    #--------------------------------- cxx
+
+ifdef COMPONENT
+    OBJS += $(USEROBJS-$(COMPONENT))
+endif
+HEADERS = $(wildcard *.h) $(wildcard *.hxx) $(wildcard glue/*.h) $(wildcard glue/*.hxx)
+
+ifndef CCANAME
+CCANAME=.t
+endif
+
+# Locations of various sources within the project and in the CCA tools and Babel installations
+vpath %.sidl $(PORT_TOP_DIR)/sidl:$(EXTERNAL_TOP_DIR)/sidl:$(COMPONENT_TOP_DIR)/sidl:$(PORT_TOP_DIR):$(COMPONENT_TOP_DIR)
+vpath %.h $(INSTALL_INCLUDE_DIR):$(PROJECT_TOP_DIR)/install/include:../install/include:../../install/include:../../../install/include:$(CCASPEC_BABEL_includedir):$(CCASPEC_BABEL_includedir)/$(LANGUAGE):$(CCASPEC_pkgincludedir)/$(LANGUAGE)
+vpath %.hxx $(INSTALL_INCLUDE_DIR):$(PROJECT_TOP_DIR)/install/include:../install/include:../../install/include:../../../install/include:$(CCASPEC_BABEL_includedir):$(CCASPEC_BABEL_includedir)/cxx:$(CCASPEC_pkgincludedir)/cxx
+vpath $(MYDIR):$(MYDIR)/glue:glue:$(INSTALL_INCLUDE_DIR)
+
+USER_TARGETS = pre-build-user post-build-user pre-gencode-user post-gencode-user pre-install-user post-install-user check-user clean-user distclean-user

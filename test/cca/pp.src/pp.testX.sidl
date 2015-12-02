@@ -1,0 +1,49 @@
+
+// DO-NOT-DELETE bocca.splicer.begin(pp.comment)
+
+// Insert-UserCode-Here {pp.comment} (Insert your package comments here)
+
+// DO-NOT-DELETE bocca.splicer.end(pp.comment)
+package pp version 0.0 {
+
+    // DO-NOT-DELETE bocca.splicer.begin(pp.testX.comment)
+
+    // Insert-UserCode-Here {pp.testX.comment} (Insert your component comments here)
+
+    // DO-NOT-DELETE bocca.splicer.end(pp.testX.comment)
+    class testX implements-all gov.cca.Component, gov.cca.ComponentRelease, gov.cca.ports.ParameterSetListener, gov.cca.ports.ParameterGetListener, gov.cca.ports.GoPort
+    {
+        // DO-NOT-DELETE bocca.splicer.begin(pp.testX.methods)
+
+        // fred
+        /* blow */
+        int doNothing(in opaque /* double ** */ arry2d, in int n, in int m);
+
+        // DO-NOT-DELETE bocca.splicer.end(pp.testX.methods)
+
+
+        //-----------------------------------------------------------------------------
+        // DO-NOT-DELETE bocca.protected.begin(bocca:pp.testX:boccaPrivateMethods)
+        // DO-NOT-EDIT
+        
+        /*
+         * Function to provide typical setServices behavior. User can bypass it by editing
+         * their setServices to not call this.
+         * @param services the services the component receives during the setServices call.
+         */
+        void boccaSetServices(in gov.cca.Services services) throws gov.cca.CCAException;
+        
+        /*
+         * Function to provide typical releaseServices behavior. User can bypass it by editing
+         * their releaseServices to not call this.
+         * @param services the services the component receives during the releaseServices call.
+         */
+        void boccaReleaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+        
+        /** This function should never be called, but helps babel generate better code. */
+        void boccaForceUsePortInclude();
+        // DO-NOT-DELETE bocca.protected.end(bocca:pp.testX:boccaPrivateMethods)
+        //-----------------------------------------------------------------------------
+    }
+}
+

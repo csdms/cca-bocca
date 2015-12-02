@@ -1,0 +1,192 @@
+#!/usr/bin/env python
+""" resplice
+   A text utility for munging babel impls and related files.
+   Author: Benjamin Allan
+   Org:	Sandia National Laboratories, Livermore
+   Date: 11/2006.
+   License: GPL. Of course this doesn't affect the files that
+	are processed by this utility.
+
+  Notes:
+	Yes, it could have equally well been written in any language
+	except bourne shell or csh or m4. All that's required is
+	matching substrings exactly and file-io.
+
+
+The splice algorithm is:
+	Verify input file, output location, spliceFiles.
+	Load inputFile
+	Identify input sections matching sourceKey and extract symbols
+		from sourcekey.begin(symbol)/sourcekey.end(symbol) pairs.
+		Errors if sections are not well-formed.
+	Find blocks from input files matching extracted symbols.
+	Find splices from splice files matching extracted symbols.
+	Warn about multiple matches in blocks/splices.
+	Warn about non-matches.
+	Foreach matching section:
+		Scan for targetKey splice, and if present replace it.
+		If not found, insert block or splice first or last as given.
+	Write output file if not dryrun.
+
+The extract algorithm is:
+	Load inputFile
+	Identify input sections matching sourceKey and extract symbols
+		from sourcekey.begin(symbol)/sourcekey.end(symbol) pairs.
+		Errors if sections are not well-formed.
+	Foreach matching key, generate or append a splice file if not a dryrun.
+
+"""
+import sys
+import os.path
+from boccalib.splicers import *
+
+def warnMessage(message, opts):
+    print "Warning: " , message
+    if opts.fatal:
+        sys.exit(3)
+
+def blockToSegment(symbol, insertions, opts, input, fname):
+    if insertions.has_key(symbol):
+        msg = "Block " + symbol + " already found in " + insertions[symbol].source()
+        warnMessage(msg, opts)
+        return false
+
+    lines=[]
+    start = opts.indent + opts.targetKey + ".begin(" + symbol + ")" + opts.commentEnd
+    stop = opts.indent + opts.targetKey + ".end(" + symbol + ")" + opts.commentEnd
+    lines.append(start)
+    # FIXME feature-- could check for target key or sourcekey found in input.
+    line= input.readline()
+    try:
+        while line:
+            lines.append(line)
+            line = input.readline()
+    except:
+        warnMessage("Error reading file " + fname, opts)
+        return False
+    lines.append(stop)
+    fs = Block.Block()
+    fs.init(opts.targetKey, lines, fname, 1)
+    insertions[symbol] = fs
+    return True
+
+
+def findBlocks( symbols, insertions, opts):
+    for j in symbols:
+        for d in opts.inputDirs:
+            fname = os.path.join(d , opts.blockFilePrefix )
+            fname += j + opts.blockFileSuffix
+            if opts.dbg:
+                print "Checking for " , fname 
+            
+            try:
+                input = open(fname,"r")
+            except:
+                continue
+            if blockToSegment(j, insertions, opts, input, fname) == None:
+                if opts.verbose:
+                    print "Failed reading input."
+            break # to scan for duplicates, must not break here.
+# end findBlocks
+
+
+def findSplices(symbols, insertions, opts):
+    # FIXME findSplices: do we need to look for named splice files in path too?
+    for i in opts.spliceFiles:
+        sf = Source.Source()
+        status, msg  = sf.loadFile(i, opts.targetKey)
+        if status:
+            warnMessage(msg, opts)
+            continue
+        for j in symbols:
+            ins = sf.getBlock(j)
+            p = insertions.get(j, None)
+            if ins != None:
+                if p != None:
+                    # FIXME whine about duplicate.
+                    pass
+                else:
+                    insertions[j] = ins
+                    # transfer from sf to insertions
+#end findSplices
+
+
+def warnMissing( symbols, insertions, opts):
+    if opts.warn:
+        for i in symbols:
+            p = insertsions.get(i, None)
+            if  p == None and \
+                (opts.warnCommon or not opts.isCommon(i)):
+                msg = "No block or splice found for input symbol " + i
+                warnMessage(msg,opts)
+# end warnMissing
+
+def mergeSymbols(  source, inName, opts):
+    symbols = source.getSymbols()
+    result = 0
+
+    insertions = {}
+    findBlocks( symbols, insertions, opts)
+    findSplices( symbols, insertions, opts)
+    # we can generate insertions in other ways; needn't be file readers.
+
+    warnMissing(symbols, insertions, opts)
+
+    for first, second in insertions.iteritems():
+        source.insert(first, second, opts)
+    
+    print "@@@@@@@@@"
+    if opts.dbg :
+        Data.printopts(opts)
+    print opts.outputFile
+    if len(opts.outputFile) <1:
+        opts.outputFile=Misc.computeOutputFileName(inName, opts.outputFile, opts.outputDir) 
+    print opts.outputFile
+    if not source.write(outFileName=opts.outputFile, verbose=opts.verbose, dryrun=opts.dryrun, rejectSave=opts.rejectSave, rejectLines=opts.rejectLines):
+        result = 1
+    
+    return result
+    
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    try:
+        opts, args = Data.parseargs(argv)
+
+        if not Data.validateOpts(opts):
+            print "Got invalid options somehow"
+            return 1
+
+        if opts.dbg :
+            Data.printopts(opts)
+    
+        inName = opts.inputFile
+        if inName == "unset":
+            inName = args[1]
+        if len(opts.vpathDir) > 0:
+            inName = os.path.join(opts.vpathDir , inName)
+
+        print "creating source"
+        source = Source.Source()
+        print "loading file " , inName
+        source.loadFile(inName, opts.sourceKey)
+        
+        if opts.extract:
+            print "writing extracts"
+            return source.writeExtracts(opts)
+        else:
+            print "processing insertions"
+            return mergeSymbols(source, inName, opts)
+
+    except Usage, err:
+        print >>sys.stderr, err.msg
+        print >>sys.stderr, "for help use --help"
+        return 2
+
+if __name__ == "__main__":
+    print "calling main"
+    sys.exit(main())

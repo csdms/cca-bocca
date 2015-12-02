@@ -1,0 +1,28 @@
+
+Derived requirements on the build system plugin using gmake
+
+B1) provide autoconf configure support.
+
+B2) provide and manage all dependency information, so that 'make'
+can be restarted at any point and end up with correct code.
+Note: this constrains the python level (bocca core) to keep
+impl files in sync with SIDL at all times.
+
+B3) provide for the following invocations at the top level
+
+make
+make check
+make install
+make clean
+make distclean
+
+B4) provide user hooks (pre, post) actions around the B3 targets
+to allow compile of external code on a per-component basis.
+
+B5) allow dependency on external sidl files.
+
+B6) allow the user to relax B2.
+Note: typically this is done simply by using the editor
+directly instead of via 'bocca edit'. When this occurs,
+the only reentry to a dependency-tracked process is to
+bocca edit --touch $symbol

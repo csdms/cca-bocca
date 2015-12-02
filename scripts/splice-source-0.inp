@@ -1,0 +1,15 @@
+
+preambling crap
+
+ // DO-NOT-DELETE bocca.splicer.begin(x.y)
+	spl line 3
+	spl line 4
+ // DO-NOT-DELETE bocca.splicer.end(x.y)
+
+ // DO-NOT-DELETE bocca.splicer.begin(x.z)
+	spl line 1
+ // DO-NOT-DELETE bocca.splicer.end(x.z)
+
+ // DO-NOT-DELETE bocca.splicer.begin(y.s)
+ // DO-NOT-DELETE bocca.splicer.end(y.s)
+post ambling crap

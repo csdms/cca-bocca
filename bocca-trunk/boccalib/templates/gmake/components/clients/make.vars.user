@@ -1,0 +1,16 @@
+# This file contains user-specified component-specific variables. 
+# Other settings can be specified through environment variables,
+# e.g., CXX, CXX_FLAGS, or command line arguments to make.
+# Also, other makefile segments can be included here.
+# --------------------------------------------------------------
+# Include path directives, including paths to Fortran modules
+INCLUDES = 
+
+# Library paths and names
+LIBS = 
+
+# Optional additional F90 flags (caution: these are likely not portable acoress compilers)
+USER_F90FLAGS =
+
+# Additional phony targets defined by users (the initial targets in make.rules.user are already included)
+USER_PHONY = 

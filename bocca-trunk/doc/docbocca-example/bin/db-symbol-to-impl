@@ -1,0 +1,81 @@
+#!/bin/sh
+# this assumes bocca is in the path and pwd is in a project.
+if test $# -ne 2; then
+	echo "$0: Incorrect number of arguments. Need symbol <header,code> "
+	exit 1
+fi
+case $2 in
+header) ;;
+code) ;;
+*)
+        echo "$0: second argument must be 'header' or 'code'."
+        exit 1
+        ;;
+esac
+lang1=`bocca display class $1 | grep '^class'`
+if test "x$lang1" = "x"; then
+	lang1=`bocca display class $1 | grep '^component'`
+fi
+lang=`echo $lang1 | sed -e 's%.*[(]%%g' | sed -e 's%).*%%g'`
+case $2 in
+header)
+	case $lang in
+	cxx)
+		file=`bocca display class $1 | grep '_Impl.hxx' |sed -e 's% *%%g'`
+	;;
+	c)
+		file=`bocca display class $1 | grep '_Impl.h' |sed -e 's% *%%g'`
+	;;
+	java | python)
+		file="none"
+	;;
+	f77)
+		file="none"
+	;;
+	f90)
+		file=`bocca display class $1 | grep '_Mod.F90' |sed -e 's% *%%g'`
+	;;
+	*)
+		echo "$0: unknown language for class $2 $1"
+		exit 1
+	;;
+	esac
+	
+;;
+code)
+	case $lang in
+	cxx)
+		file=`bocca display class $1 | grep '_Impl.cxx' |sed -e 's% *%%g'`
+	;;
+	c)
+		file=`bocca display class $1 | grep '_Impl.c' |sed -e 's% *%%g'`
+	;;
+	java)
+		file=`bocca display class $1 | grep 'implementation:' |sed -e 's%.*:%%g'`
+	;;
+	python | f77)
+		file=`bocca display class $1 | grep 'implementation:' |sed -e 's%.*:%%g'`
+	;;
+	f90)
+		file=`bocca display class $1 | grep '_Impl.F90' |sed -e 's% *%%g'`
+	;;
+	*)
+		echo "$0: unknown language for class $2 $1"
+		exit 1
+	;;
+	esac
+;;
+*)
+	echo "$0: Second argument must be one of: header code "
+	exit 1
+esac
+
+if test "x$file" = "none"; then
+	echo "There is no impl $2 file for $1 with language $lang"
+fi
+if test "x$file" = "x"; then
+	echo "Unable to determine impl $2 file for $1"
+	exit 1
+fi
+echo $file
+exit 0

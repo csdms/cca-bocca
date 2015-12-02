@@ -1,0 +1,14 @@
+  /* DO-NOT-DELETE insert.begin(n1.s1) */
+	-1
+	-2
+	-3
+  /* DO-NOT-DELETE insert.end(n1.s1) */
+
+  /* DO-NOT-DELETE insert.begin(n1.s2) */
+	c
+	d
+  /* DO-NOT-DELETE insert.end(n1.s2) */
+
+  /* DO-NOT-DELETE other.end(n1.s3) */
+	x
+  /* DO-NOT-DELETE other.end(n1.s3) */

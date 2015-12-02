@@ -1,0 +1,379 @@
+# --------! Avoid modifying this file unless you know what you are doing !-------
+#
+# This file contains common makefile elements for building the component
+# libraries in this example. Users are responsible for setting a couple of
+# component properties in a include make file in each component subdirectory
+# (the same place where implementation files reside, for example
+# pkg1.pkg2.ComponentName). Avoid changing this file.
+# 
+# Note that this file relies on the component code being organized in 
+# a certain directory structure, with a top-level directory that matches
+# the fully-qualified SIDL symbol name, and separate subdirectory "glue" 
+# for the Babel-generated glue code.
+#
+# The variables used in this file but defined outside of this file and 
+# common.make are:
+#
+# EXTRA_PYTHON_LIBS : extra python libraries needed for linking python
+#                     components (e.g., -lutil)
+
+SERVER_BUILD=1
+
+# Determine the current component's SIDL symbol and language, also set library name
+# Note that the variable $(COMPONENT) is used for the SIDL symbol and can be 
+# any SIDL class, not necessarily only those that extend gov.cca.Component
+# The libraries are built the same for all SIDL classes, but some extra tests
+# are generated for components.
+MYDIR := $(shell bash -c "pwd -P")
+
+ifndef COMPONENT_TOP_DIR
+	ABS_TOP=$(shell cd $(RELATIVE_TOP) && bash -c "pwd -P")
+    COMPONENT_TOP_DIR=$(ABS_TOP)/components
+endif
+
+ifndef COMPONENT
+    COMPONENT = $(notdir $(MYDIR))
+endif
+MYSYMBOL:=$(COMPONENT)
+
+# Include the file containing the list of classes and components (with languages)
+ifeq ($(shell if test -f $(COMPONENT_TOP_DIR)/make.components ; then echo "0"; else echo "1"; fi),0)
+    include $(COMPONENT_TOP_DIR)/make.components
+endif
+
+COMPONENTS_AND_CLASSES := $(COMPONENTS) $(CLASSES)
+COMPONENT := $(strip $(COMPONENT))
+COMPONENT_DESC := $(strip $(filter $(COMPONENT)-%, $(COMPONENTS_AND_CLASSES)))
+LANGUAGE := $(strip $(shell echo $(COMPONENT_DESC) | sed -e 's|^.*-||g'))
+
+# The common.make file contains CCA and Babel settings, as well as 
+# compilation targets for all languages.
+ifeq ($(shell if test -f $(COMPONENT_TOP_DIR)/../buildutils/make.vars.common ; then echo "0"; else echo "1"; fi),0)
+    include $(COMPONENT_TOP_DIR)/../buildutils/make.vars.common
+    # this also includes make.project, make.vars.user (all levels), ports/make.ports and components/make.components
+else
+    $(error "Please run configure in the top-level directory before invoking make")
+endif
+
+# User-specified settings for all components
+ifeq ($(shell if test -f $(COMPONENT_TOP_DIR)/make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include $(COMPONENT_TOP_DIR)/make.vars.user
+endif
+
+# User-specified component-specific settings
+ifeq ($(shell if test -f make.vars.user ; then echo "0"; else echo "1"; fi),0)
+    include make.vars.user
+endif
+
+ifndef INSTALL_TARGET
+    INSTALL_TARGET=install_local
+endif
+
+# Component SIDL file
+SIDL_FILE := $(COMPONENT_SIDL_DIR)/$(COMPONENT).sidl 
+
+# The following variables are used in common.make (as well as COMPONENT and SERVER_BUILD)
+CCANAME = $(COMPONENT).cca
+DEPLNAME = $(COMPONENT)_depl.xml
+
+ifndef LIB_DIR
+    LIB_DIR := $(MYDIR)
+endif
+LIBNAME = lib$(COMPONENT).la
+
+ifeq ($(MAKECMDGOALS),install)
+    LIB_DIR := $(LIB_DIR)/.install
+endif
+
+LIBPATH = $(LIB_DIR)/$(LIBNAME)
+MYCOLOR = $(MAGENTA)
+
+SIDL_FILES = $(SIDL_FILE)
+
+# Computes include paths and library names for all SIDL symbol this component/class depends on.
+# Uses the value of MYSYMBOL (the fully qualified SIDL symbol of the entity we are building).
+# Defines the variables: CLIENT_SIDL_FILES, CLIENT_IOR_TARGETS, CLIENT_LIB_TARGETS, CLIENT_INCLUDES, CLIENT_LIB_DIRS
+# and updates the SIDL_FILE variable with dependency SIDL files and the ALL_INCLUDES and BABEL_INCLUDES variables 
+# with the computed include paths. Also extends the vpath accordingly.
+include $(UTILS_DIR)/make.deps.common
+
+ifeq ($(MAKELEVEL),0)
+    LIB_PREREQUISITES=$(strip $(sort $(PORT_LIB_TARGETS) $(EXT_LIB_TARGETS) $(CLASS_LIB_TARGETS) $(CLIENT_IMPL_LIBS)))
+else
+    # The higher-level make took care of library dependencies, don't waste time checking again
+    LIB_PREREQUISITES=
+endif
+
+ALL_LIBS = $(addprefix -R,$(INSTALL_LIB_DIR)) $(addprefix -L,$(INSTALL_LIB_DIR)) \
+    $(CLIENT_LIBS) $(LIBS_$(COMPONENT)) $(CCA_LIBS)
+
+ifeq ($(LANGUAGE),f90)
+	F90FLAGS += $(addprefix $(CCASPEC_BABEL_F90MFLAG) ,$(MYDIR) $(CLIENT_LIB_DIRS) $(DEPCLASS_LIB_DIRS))
+endif
+
+# Determine whether the current class is a component (or just a class)
+ifneq ($(findstring $(COMPONENT),$(CLASSES)),)
+	NOT_A_COMPONENT=1
+else
+	NOT_A_COMPONENT=0
+endif
+
+ifneq ($(MAKECMDGOALS),.gencode)
+# Combine Babel-generated makefile segments into one babel.make.all file (only for classes, not interfaces)
+ifdef SERVER_BUILD
+    BABEL_MAKE_ALL = $(shell $(UTILS_DIR)/combineBabelMakes.sh)
+    ifeq ($(shell if test -f $(BABEL_MAKE_ALL) ; then echo "0"; else echo "1"; fi),0)
+        include $(BABEL_MAKE_ALL)
+    endif
+endif
+endif
+
+DEPOBJS=$(addprefix $(MYDIR)/,$(OBJS)) $(addprefix $(MYDIR)/,$(F90_OBJS))
+ifeq ($(LANGUAGE),java)
+	DEPOBJS+=$(JAVA_OBJS)
+endif
+
+DEP_SIDL_FILES:=$(sort $(PORT_SIDL_DEPS_$(COMPONENT)) $(CLASS_SIDL_DEPS_$(COMPONENT)))
+
+## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+## !!!!!!! The rest of the Makefile is disabled if COMPONENT is not defined !!!!!! 
+## !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+ifneq ($(COMPONENT),)
+
+# Check to see if the component's language is supported by the CCA tools with which this 
+# project was configured
+ifneq ($(filter $(LANGUAGE),$(SUPPORTED_COMPONENT_LANGUAGES)),)
+
+#---------------------------------------------------------------------------------------=
+# Server-specific targets
+
+all: .msg $(LIBPATH) 
+	@-msg=" doing nothing -- library is up-to-date."; \
+	if [ -f $(COMPONENT_TOP_DIR)/.make-result ]; then \
+		res=`grep $(COMPONENT) $(COMPONENT_TOP_DIR)/.make-result | wc -l | sed -e 's/ *//'`; \
+		if [ "$$res" = "0" ] ; then echo $$msg; fi; \
+	else echo $$msg; fi
+	
+#-----------------------------------------------------------------------------------------
+.msg: 
+	@-touch .output.$(COMPONENT)
+
+#----------------------------------------------------------------------------------------
+# Common rules for building client and server code
+include $(UTILS_DIR)/make.rules.common
+	
+#-----------------------------------------------------------------------------------------
+# Generate server code for this class or component using Babel
+.gencode:  $(SIDL_FILE) $(DEP_SIDL_FILES)
+	@$(MAKE) $(CCA_MAKEFLAGS) pre-gencode-user
+	$(HIDE_LIBTOOL)if [ "x$(QUIET)" = "x" ] ; then \
+		echo "   [s] using Babel to generate $(MYCOLOR)$(LANGUAGE)$(BLACK) implementation code from $(notdir $(SIDL_FILE))... "; \
+	fi; \
+	echo "$(BABEL) -s $(LANGUAGE) $(BABEL_INCLUDES) $(XML_REP) -u -m ".$(COMPONENT)." $(EXTRA_BABEL_OPTIONS) $(SIDL_FILE) -o $(MYDIR)" $(OUT_REDIRECT); \
+	$(BABEL) -s $(LANGUAGE) $(BABEL_INCLUDES) $(XML_REP) -u -m ".$(COMPONENT)." $(EXTRA_BABEL_OPTIONS) $(SIDL_FILE) -o $(MYDIR) $(OUT_REDIRECT);
+	@echo "   [s] compiling sources... ";
+	@touch $@
+	@$(MAKE) $(CCA_MAKEFLAGS) post-gencode-user
+
+#------------------------------------------------------------------------------------------
+# Build component library
+
+$(DEPOBJS): .gencode $(LIB_PREREQUISITES) 
+
+ifneq ($(IMPLOBJS),)  
+$(IMPLOBJS): $(addprefix $(MYDIR)/,$(IMPLHDRS)) $(addprefix $(MYDIR)/,$(IMPLSRCS))
+ifeq ($(LANGUAGE),cxx)
+$(addprefix $(MYDIR)/,$(SKELOBJS)): $(addprefix $(MYDIR)/,$(IMPLHDRS))
+endif
+endif
+
+.lib-$(COMPONENT) $(LIBPATH): $(DEPOBJS) $(IMPLOBJS) $(PYTHONSRC) 
+	@-if [ "x$(QUIET)" = "x" ] ; then echo "   [s] creating class/component library: $(notdir $(LIBPATH)) ... "; fi
+	$(HIDE_LIBTOOL)\
+	if [ "x$(LANGUAGE)" = "xpython" ]; then \
+		for f in $(strip $(PYTHONSRC)) ; do \
+			$(PYTHON) -c "import compiler; compiler.parseFile('$(COMPONENT_TOP_DIR)/$(COMPONENT)/$$f')" > .python.output 2>&1; \
+			if [ "x$$?" != "x0" ]; then echo "Syntax error in $(COMPONENT_TOP_DIR)/$(COMPONENT)/$$f"; cat .python.output; exit 1; fi; \
+		done; \
+		$(PYTHON) .$(COMPONENT).setup.py build_ext $(HIDE_COMPILE) \
+			--include-dirs $(ALLPYTHON_MODINC) $(DEPS_MODINC) \
+			--library-dirs=$(CCASPEC_BABEL_libdir) > .python.output 2>&1; \
+		if [ "x$$?" != "x0" ]; then cat .python.output; exit 1; fi; \
+	elif [ "x$(LANGUAGE)" = "xjava" ]; then \
+		$(CCASPEC_BABEL_JAVAC) $(JAVAFLAGS_USER) $(JAVA_CP) $(JAVASRCS) > .java.output 2>&1 ; \
+		if [ "x$$?" != "x0" ]; then cat .java.output; exit 1; fi \
+	fi ;
+	$(HIDE_LIBTOOL)$(LIBTOOL) --mode=link --tag=CXX $(HIDE_COMPILE) \
+	   $(CXX) $(ALL_INCLUDES) $(F90_OBJS) $(OBJS) \
+	   -rpath $(INSTALL_LIB_DIR)  -o $(LIBNAME) $(ALL_LIBS); 
+	@-if [ "x$(QUIET)" = "x" ] ; then echo "   [s] finished libtooling: $(LIBPATH:$(PROJECT_TOP_DIR)/%=%) ... "; fi
+	$(HIDE_LIBTOOL)$(MAKE) $(CCA_MAKEFLAGS) post-build-user; 
+	$(HIDE_LIBTOOL)if [ "$(INSTALL_TARGET)" = "install_local" ]; then \
+		$(MAKE) $(CCA_MAKEFLAGS) INSTALL_TARGET=$(INSTALL_TARGET) COMPONENT_TOP_DIR=$(COMPONENT_TOP_DIR) COMPONENT=$(COMPONENT) install_local; \
+	fi; 
+	@if [ "x$(DEBUG)" != "x" ] ; then echo "   [s] created and installed $(LIBPATH) in $(INSTALL_LIB_DIR)... "; fi	
+	@touch .lib-$(COMPONENT)
+	@-if [ -f .lib-$(COMPONENT) ]; then \
+		echo "SUCCESS building $(COMPONENT)" >> $(COMPONENT_TOP_DIR)/.make-result;\
+	else \
+		echo "***FAILURE building $(COMPONENT)" >> $(COMPONENT_TOP_DIR)/.make-result;\
+	fi;
+
+#---------------------------------------------------------------------------------------
+# Install component libraries and associated files (TODO -- this is still untested, needs fixes)
+install install_local: $(LIBPATH) pre-install-user
+	@if [ "x$(DEBUG)" != "x" ] ; then echo "   [s] installing library: $(MYCOLOR)$(LIBPATH)$(BLACK)... "; \
+	else if [ "$(INSTALL_TARGET)" != "install_local" ]; then echo "   [s] installing library: $(MYCOLOR)$(notdir $(LIBPATH))$(BLACK)... "; fi; fi
+	$(HIDE_LIBTOOL)if ! test -d $(INSTALL_LIB_DIR) ; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR) ; fi
+	$(HIDE_LIBTOOL)if ! test -d $(INSTALL_INCLUDE_DIR) ; then $(UTILS_DIR)/mkdirhier $(INSTALL_INCLUDE_DIR) ; fi
+	$(HIDE_LIBTOOL)if ! test -d $(INSTALL_DATA_DIR)/cca ; then $(UTILS_DIR)/mkdirhier $(INSTALL_DATA_DIR)/cca ; fi
+	$(HIDE_LIBTOOL)if [ "x$(LANGUAGE)" = "xpython" ] ; then \
+	   $(PYTHON) .$(COMPONENT).setup.py install_headers $(HIDE_COMPILE) \
+       --install-dir=$(INSTALL_INCLUDE_DIR)/$(PYTHON_VER)/babel \
+       --library-dirs=$(CCASPEC_BABEL_libdir) \
+       --force $(OUT_REDIRECT); \
+	   $(PYTHON) .$(COMPONENT).setup.py install_lib $(HIDE_COMPILE) \
+		--install-dir=$(INSTALL_LIB_DIR)/$(PYTHON_VER)/site-packages \
+		--include-dirs=$(CCASPEC_pkgincludedir)/$(PYTHON_VER)\
+                $(CCASPEC_BABEL_PYTHON_INCDIRS) \
+		--include-dirs=$(CCASPEC_BABEL_includedir) \
+		--include-dirs=$(CCASPEC_BABEL_includedir)/$(PYTHON_VER)/babel \
+		--include-dirs=$(INSTALL_INCLUDE_DIR) \
+		--include-dirs=$(INSTALL_INCLUDE_DIR)/$(PYTHON_VER)/babel \
+		--library-dirs=$(CCASPEC_BABEL_libdir) \
+		--force $(OUT_REDIRECT); \
+	fi
+	$(HIDE_LIBTOOL)$(LIBTOOL) --mode=install $(HIDE_COMPILE) cp $(LIBNAME) $(INSTALL_LIB_DIR) $(OUT_REDIRECT); 
+	$(HIDE_LIBTOOL)\
+	if [ "x$(LANGUAGE)" = "xjava" ]; then \
+		if [ ! -d "$(INSTALL_LIB_DIR)/$(LANGUAGE)" ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR)/$(LANGUAGE); fi; \
+		classes=`find . -name '*.class'` && \
+	  	dirs=`for i in \`echo $$classes\` ; do dirname $$i; done` && \
+		dirsunique=`for i in $$dirs ; do echo "$$i"; done | sort -u` && \
+		for dir in $$dirsunique; do \
+			if [ ! -d $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir; fi; \
+			cp -f $$dir/*.class  $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ;\
+		done;\
+	fi;
+	$(HIDE_LIBTOOL)$(UTILS_DIR)/genSCLCCA.sh cca \
+		$(INSTALL_LIB_DIR)/$(LIBNAME) $(COMPONENT) \
+		$(LANGUAGE) dynamic global now \
+		$(COMPONENT) $(CLASS_NAMES) > $(CCANAME); 
+	$(HIDE_LIBTOOL)$(LIBTOOL) --mode=install $(HIDE_COMPILE) cp $(LIBNAME) $(INSTALL_LIB_DIR); 
+	$(HIDE_LIBTOOL)if [ ! -d "$(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)" ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME); fi;
+	$(HIDE_LIBTOOL)echo "   [s] building $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)/$(DEPLNAME) ... $(PARENT)"
+	-$(HIDE_LIBTOOL)$(CCASPEC_GENCCAXML) $(CCA_TYPE_$(COMPONENT)) $(COMPONENT) \
+		--with-babel-config=$(CCASPEC_BABEL_BABEL_CONFIG) \
+		-o $(DEPL_TOP_DIR)/$(DEPLNAME) \
+		--deployment-path=$(DEPL_TOP_DIR)/$(DEPLNAME) \
+		--prefix=$(PREFIX) \
+		--lib=$(INSTALL_LIB_DIR) \
+		--language=$(CCA_LANG_$(COMPONENT)) \
+		--project=$(PROJECT_NAME) \
+		--clients=$(INSTALL_LANGUAGES_COMMA)
+	-$(HIDE_LIBTOOL)$(INSTALL_DATA) $(DEPL_TOP_DIR)/$(DEPLNAME) $(INSTALL_DATA_DIR)/cca/$(PROJECT_NAME)/$(DEPLNAME)
+	$(HIDE_LIBTOOL)$(INSTALL_DATA) $(CCANAME) $(INSTALL_DATA_DIR)/cca; 
+	$(HIDE_LIBTOOL)$(INSTALL_DATA) $(SIDL_FILE) $(INSTALL_DATA_DIR)/cca;
+	$(HIDE_LIBTOOL)if [ "x$(LANGUAGE)" = "xjava" ]; then \
+	  classes=`find . -name '*.class'` && \
+	  dirs=`for i in \`echo $$classes\` ; do dirname $$i; done` && \
+          dirsunique=`for i in $$dirs ; do echo "$$i" ; done | sort -u` && \
+          for dir in $$dirsunique; do \
+               if [ ! -d $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ]; then $(UTILS_DIR)/mkdirhier $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir; fi; \
+               cp -f $$dir/*.class  $(INSTALL_LIB_DIR)/$(LANGUAGE)/$$dir ;\
+	  done;\
+	fi;
+	$(HIDE_LIBTOOL)if [ "x$(INSTALL_TARGET)" = "xinstall" ]; then rcsuffix=installed.gen.rc; else rcsuffix=gen.rc; fi; \
+	echo "   [s] creating Ccaffeine test script ($(COMPONENT_TOP_DIR:$(PROJECT_TOP_DIR)/%=%)/tests/instantiation.$$rcsuffix)... "; \
+	if [ "x$(NOT_A_COMPONENT)" = "x0" ]; then \
+		$(UTILS_DIR)/generateRCSegment.sh $(COMPONENT_TOP_DIR)/tests/instantiation.$$rcsuffix \
+			$(INSTALL_LIB_DIR) $(COMPONENT) ; \
+		$(UTILS_DIR)/generateRCSegment.sh $(COMPONENT_TOP_DIR)/tests/guitest.$$rcsuffix \
+			$(INSTALL_DATA_DIR)/cca $(COMPONENT) ; \
+	fi
+	@$(MAKE) $(CCA_MAKEFLAGS) post-install-user
+
+
+#---------------------------------------------------------------------------------------=
+else     # ifneq ($(filter $(LANGUAGE),$(SUPPORTED_COMPONENT_LANGUAGES)),)
+
+#-----------------------------------------------------------------------------------------
+# The language of this class or component implementation is not supported by the 
+# current Babel configuration.
+
+all: 
+	@-echo "### Warning: $(COMPONENT) build disabled since $(LANGUAGE) is not supported by the current project configuration."
+
+.gencode: 
+	@-echo "### Warning: $(COMPONENT) build disabled since $(LANGUAGE) is not supported by the current project configuration."
+
+install: 
+	@-echo "### Warning: $(COMPONENT) installation disabled since $(LANGUAGE) is not supported by the current project configuration."
+	
+endif 	 # else clause of ifneq ($(filter $(LANGUAGE),$(LANGUAGES)),)
+
+endif    #ifneq ($(COMPONENT),)
+
+clean:
+	$(HIDE_LIBTOOL)$(LIBTOOL) --mode=clean $(HIDE_COMPILE) $(RM) -r *.lo *.la glue/*.lo *.mod *.cca *.o .lib-* \
+		.user_compile_target* .libs/* .gencode .install .portregen .output.$(COMPONENT) \
+		babel.make.all babel*.tmp .*.babel.make* .output $(OUT_REDIRECT)
+	@-if [ "x$(LANGUAGE)" = "xpython" ]; then \
+		$(PYTHON) .$(COMPONENT).setup.py clean --all $(HIDE_COMPILE) $(OUT_REDIRECT); \
+	fi
+	@-if [ "x$(LANGUAGE)" = "xjava" ]; then \
+		find . -name '*.class' -print -exec $(RM) {} \;  $(OUT_REDIRECT); \
+	fi
+	@-$(RM) -r python java
+	@$(MAKE) $(CCA_MAKEFLAGS) clean-user
+	
+distclean: clean
+	@-if [ "x$(LANGUAGE)" = "xpython" ]; then \
+		find  . -name "*.c" -or -name "*.h" -or -name "__init__.py" \
+			-or -name ".*.setup.py" | xargs $(RM)  $(OUT_REDIRECT);\
+	fi
+	-$(RM) -r glue .*.make* *babel.make*  .*.babel.make.* .lib* .install* Makefile $(OUT_REDIRECT)
+	@$(MAKE) $(CCA_MAKEFLAGS) distclean-user
+	
+
+# The debug target is mainly used for debugging during development
+debug:
+	@echo "COMPONENT=$(COMPONENT)"
+	@echo "COMPONENT_TOP_DIR=$(COMPONENT_TOP_DIR)"
+	@echo "Dependencies on SIDL: $(DEP_SIDL_FILES)"
+	@echo "LOCAL_PREFIX=$(LOCAL_PREFIX)"
+	@echo "MYDIR=$(MYDIR)"
+	@echo "LANGUAGE=[$(LANGUAGE)]"
+	@echo "SIDL_FILES=$(SIDL_FILES)"
+	@echo "LIBS_$(COMPONENT)=$(LIBS_$(COMPONENT))"
+	@echo "LIBPATH=$(LIBPATH)"
+	@echo "INCLUDES_$(COMPONENT)=$(INCLUDES_$(COMPONENT))"
+	@echo "ALL_INCLUDES=$(ALL_INCLUDES)"
+	@echo "ALL_LIBS=$(ALL_LIBS)"
+	@echo "OBJS=$(OBJS), F90_OBJS=$(F90_OBJS)"
+	@echo "vpath %.h $(PORT_TOP_DIR)/include:$(CCASPEC_BABEL_includedir):$(CCASPEC_BABEL_includedir)/$(LANGUAGE):$(CCASPEC_pkgincludedir)/$(LANGUAGE)"
+	@echo "client vpath=$(shell echo $(CLIENT_LIB_DIRS) | sed -e 's|  *|:|g')"
+	@echo "F90MOD_OBJS=$(F90MOD_OBJS), F90IMPL_OBJS=$(F90IMPL_OBJS)"
+	@echo "SETUP_PY=$(SETUP_PY)"
+	@echo "PORT_TOP_DIR=$(PORT_TOP_DIR)"
+	@echo "JAVASRCS=$(JAVASRCS), JAVA_OBJS=$(JAVA_OBJS)"
+	@echo "JAVA_CP=$(JAVA_CP)"
+	@echo "CCASPEC_BABEL_includedir/PYTHON_VER=$(CCASPEC_BABEL_includedir)/$(PYTHON_VER)"
+	@echo "VPATH=$(VPATH) -- this doesn't include vpath directive settings"
+	@echo "CLIENT_SIDL_FILES=$(CLIENT_SIDL_FILES)"
+	@echo "CLIENT_IOR_TARGETS=$(CLIENT_IOR_TARGETS)"
+	@echo "CLIENT_LIB_TARGETS=$(CLIENT_LIB_TARGETS)"
+	@echo "CLIENT_IMPL_LIBS=$(CLIENT_IMPL_LIBS)"
+	@echo "CLIENT_INCLUDES=$(CLIENT_INCLUDES)"
+	@echo "CLASS_SIDL_FILES=$(CLASS_SIDL_FILES)"
+	@echo "MAKEFLAGS=$(MAKEFLAGS)"
+	@echo "MAKECMDGOALS=$(MAKECMDGOALS)"
+
+.PHONY: clean distclean check_top_dir install install_local debug $(USER_TARGETS) $(USER_PHONY) 
+
+#-----------------------------------------------------------------------------------------
+# User-specified component-specific rules
+ifeq ($(shell if test -f make.rules.user ; then echo "0"; else echo "1"; fi),0)
+    include make.rules.user
+endif
+

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- This is the top-level ant build file for continuous integration support with CruiseControl -->
+<project name="bocca" default="make">
+  <target name="configure">
+    <exec executable="configure">
+    </exec>
+  </target>
+  <target name="clean">
+    <exec executable="make">
+        <arg line="clean"/>
+    </exec>
+    <exec executable="rm">
+        <arg line="${webdir}/tests/*.txt ${tracdir}/tests/*.txt"/>
+    </exec>
+  </target>
+  <target name="make">
+    <exec executable="make">
+        <arg line="install"/>
+    </exec>
+  </target>
+  <target name="check">
+    <exec executable="make">
+        <arg line="check"/>
+    </exec>
+  </target>
+  <target name="copywebfiles">
+    <exec executable="scripts/copytestresults.sh">
+        <arg line="${topdir} ${webdir} ${tracdir}"/>
+    </exec>
+  </target>
+</project>

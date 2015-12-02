@@ -1,0 +1,60 @@
+package drivers version 1.0 {
+
+/*
+ * One for Fortran:
+ */
+  class F90Driver implements gov.cca.ports.GoPort,
+                                 gov.cca.Component
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+ 
+/*
+ * One for C++:
+ */
+  class CXXDriver implements gov.cca.ports.GoPort,
+                                 gov.cca.Component
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+/*
+ * Two Python components: a driver and an application builder:
+ */
+  class PYDriver implements gov.cca.ports.GoPort,
+                            gov.cca.Component
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+  
+  class PYBuilder implements-all gov.cca.ports.GoPort,
+                                 gov.cca.Component
+  {
+  }
+  
+/*
+ * One for parallel Fortran:
+ */
+  class F90DriverMPI implements gov.cca.ports.GoPort,
+                                 gov.cca.Component,
+                                 gov.cca.ComponentRelease
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+     void releaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+ 
+/*
+ * One for parallel C++:
+ */
+  class CXXDriverMPI implements gov.cca.ports.GoPort,
+                                 gov.cca.Component,
+                                 gov.cca.ComponentRelease
+  {
+     int go();
+     void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+     void releaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+}

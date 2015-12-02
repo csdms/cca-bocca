@@ -1,0 +1,121 @@
+#!/usr/bin/env python
+""" merge, a simple driver for merging two files, the splices from one into the other, overwriting the target file's blocks and leaving the rubble in a .rej
+file.
+   Author: Benjamin Allan
+   Org:	Sandia National Laboratories, Livermore
+   Date: 3/2006.
+   License: GPL. Of course this doesn't affect the files that
+	are processed by this utility.
+
+The splice algorithm is:
+	Load outputfile, inputFile
+	Identify input sections matching sourceKey and extract symbols
+		from sourcekey.begin(symbol)/sourcekey.end(symbol) pairs.
+		Errors if sections are not well-formed.
+	Warn about multiple matches in blocks/splices.
+	Warn about non-matches.
+	Foreach matching section:
+		Scan for targetKey splice, and if present replace it.
+		If not found, insert block or splice first or last as given.
+	Write output file if not dryrun.
+
+"""
+import sys
+import os.path
+import distutils.sysconfig
+
+def warnMessage(message, opts):
+    print "Warning: " , message
+    if opts.fatal:
+        sys.exit(3)
+
+# FIX BOCCA PATH. We end up doing this in every python script. maintenance hassle.
+#
+bocca_self = os.path.realpath(sys.argv[0])
+bocca_tools_bin = os.path.dirname(bocca_self)
+libdirname = distutils.sysconfig.get_config_var('LIB')
+if libdirname is None: libdirname = 'lib' # for python versions < 2.5
+
+try:
+    boccalibPath = os.path.abspath(os.path.join(bocca_tools_bin, '..', libdirname,
+                                    'python' + distutils.sysconfig.get_python_version(),
+                                    'site-packages', 'boccalib'))
+    subcmdModulePath = os.path.join(boccalibPath, 'cct')
+    sys.path.append(boccalibPath)
+    sys.path.append(subcmdModulePath)
+except:
+    print 'bocca: Cannot locate bocca module path.'
+    exit(1)
+
+# print >> sys.stderr, "python path is:"
+# print >> sys.stderr, sys.path
+
+import cct._modulePath
+cct._modulePath.setModulePath(boccalibPath)
+
+# now we can import ok.
+from splicers.Data import *
+from splicers.Source import *
+from splicers.Operations import *
+
+def findSplices(symbols, insertions, srcName, sourceKey, verbose):
+    sf = Source()
+    status, msg  = sf.loadFile(srcName, sourceKey)
+    if status:
+        warnMessage(msg, opts)
+    for j in symbols:
+        ins = sf.getBlock(j)
+        p = insertions.get(j, None)
+        if ins != None:
+            if verbose:
+                print "found an insertion for " , j
+            if p != None:
+                # FIXME whine about duplicate.
+                pass
+            else:
+                # transfer from sf to insertions
+                insertions[j] = ins
+#end findSplices
+
+
+def warnMissing( symbols, insertions, opts):
+    if opts.warn:
+        for i in symbols:
+            p = insertions.get(i, None)
+            if  p == None and \
+                (opts.warnCommon or not opts.isCommon(i)):
+                msg = "No block or splice found for input symbol " + i
+                warnMessage(msg,opts)
+# end warnMissing
+
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    try:
+        opts, args = parseargs(argv)
+
+        if not validateOpts(opts) or not opts.robMode :
+            print "Got invalid options somehow or not simple merge usage"
+            return 1
+
+        if opts.dbg :
+            printopts(opts)
+    
+        targetName = opts.outputFile
+        srcName = opts.inputFile
+
+        mergeFiles(targetName, srcName, opts.targetKey, opts.sourceKey, warn=opts.warn, methodMatch=opts.methodMatch, oldtype=opts.fromType, newtype=opts.toType, 
+                   verbose=opts.verbose, matchSyms=opts.matchSyms, excludeSyms=opts.excludeSyms, preserveProtected=opts.preserveProtected,
+                   outputConflicts=opts.outputConflicts, commentBegin=opts.commentBegin, commentEnd=opts.commentEnd)
+        return 0
+    except Usage, err:
+        print >>sys.stderr, err.msg
+        print >>sys.stderr, "for help use --help"
+        return 2
+
+if __name__ == "__main__":
+    sys.exit(main())

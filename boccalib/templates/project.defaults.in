@@ -1,0 +1,60 @@
+[Project]
+
+# Automatically update component implementations when SIDL files change or 
+# project entities are added or removed
+autoregenimpls = enabled                # possible values: enabled,disabled
+
+# Verbosity level when autoregenimpls or autochecksidl is enabled
+regen_messages = verbose                # possible values: terse,verbose
+
+# Automatically check SIDL by running babel -p after editing operations
+autochecksidl = enabled                 # possible values: enabled, disabled
+
+# Enable/disable automatic build when project elements are added or modified.
+build_automatically = disabled          # possible values: enabled,disabled
+
+# A list of methods to exclude when importing from existing implementations
+exclude_from_import = setServices, releaseServices
+
+# A comma-separated list of methods to exclude when importing from existing SIDL
+# (regular expressions accepted)
+exclude_from_sidl_import = bocca*
+
+# Use colors in output (works in most shells)
+use_colors = disabled                   # possible values: enabled, disabled 
+
+# Show the time some bocca commands took
+timing = disabled                       # possible values: enabled, disabled
+
+[SIDL]
+
+tab_size = 4                            # tab size for indentation in generated SIDL
+
+[Babel]
+
+# Default language for generating impls and clients (one of: c, cxx, f90, f77, python, java)
+default_language = cxx	
+
+# The babel-config executable (full path)
+babel_config="@BABEL_CONFIG@"  
+
+[CCA]
+
+# The cca-spec-babel-config executable (full path):
+cca_spec_babel_config="@CCA_SPEC_BABEL_CONFIG@"  
+
+[ccaffeine]
+
+# The ccafe-config executable (full path)
+ccafe_config="@CCAFE_CONFIG@"	
+
+[External]
+# Place full paths to external SIDL here
+
+[Bocca]
+# Internal Bocca settings, modification not recommended.
+
+# Known external packages (normally this should not be modified). 
+# This is mainly needed in cases where one does *not* want to recognize cca.*
+known_packages = sidl.,cca.,ccaffeine.
+

@@ -1,0 +1,38 @@
+package functions version 1.0 {
+
+  class LinearFunction implements function.FunctionPort, 
+                                  gov.cca.Component
+  {
+    // function.FunctionPort methods:
+    void   init(in array<double,1> params);
+    double evaluate(in double x);
+
+    // gov.cca.Component methods:
+    void setServices(in gov.cca.Services servicesHandle) throws gov.cca.CCAException;
+  }
+
+  // The following two component declarations use the 'implements-all'
+  // SIDL keyword, so the methods in the two interfaces being 
+  // fully implemented do not need to be listed explicitly
+  
+  class NonlinearFunction implements-all function.FunctionPort, 
+                                         gov.cca.Component
+  {
+  }
+
+  class PiFunction implements-all function.FunctionPort, 
+                                  gov.cca.Component
+  {
+  }
+
+  class CubeFunction implements-all function.FunctionPort, 
+                                    gov.cca.Component
+  {
+  }
+
+  class QuadFunction implements-all function.FunctionPort, 
+                                    gov.cca.Component
+  {
+  }
+
+}

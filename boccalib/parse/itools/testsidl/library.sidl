@@ -1,0 +1,64 @@
+/**
+ * Define classes to implement the UnitLibrary port.
+ */
+package library version 1.0 {
+
+  class PyUnknownException extends sidl.SIDLException 
+                           implements units.UnknownUnitException 
+  { }
+
+  class PySimpleUnit implements-all units.Unit {
+    static PySimpleUnit build(in string name,
+                              in double slope,
+                              in double offset);
+    void init(in string name,
+              in double slope,
+              in double offset);
+  }
+
+  class PySimpleConversion implements-all units.Conversion {
+    static PySimpleConversion build(in units.Unit fromUnit,
+                                    in units.Unit toUnit);
+     void init(in units.Unit fromUnit,
+               in units.Unit toUnit);
+    /**
+     * Reverse the direction of the conversion.
+     */
+    void reverse();
+  }
+
+  class PyUnitsLibraryComp implements-all gov.cca.Component,
+     units.UnitsLibrary
+  {
+  }
+
+  class CxxUnknownException extends sidl.SIDLException 
+                         implements units.UnknownUnitException 
+  { }
+
+  class CxxSimpleUnit implements-all units.Unit {
+    static CxxSimpleUnit build(in string name,
+                               in double slope,
+                               in double offset);
+
+    void init(in string name,
+              in double slope,
+              in double offset);
+  }
+
+  class CxxSimpleConversion implements-all units.Conversion {
+    static CxxSimpleConversion build(in units.Unit fromUnit,
+                                     in units.Unit toUnit);
+     void init(in units.Unit fromUnit,
+              in units.Unit toUnit);
+    /**
+     * Reverse the direction of the conversion.
+     */
+    void reverse();
+  }
+
+  class CxxUnitsLibraryComp implements-all gov.cca.Component,
+     units.UnitsLibrary
+  {
+  }
+}

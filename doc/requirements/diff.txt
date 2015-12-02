@@ -1,0 +1,31 @@
+Given 2 bocca project trees (or partial trees due to version control), tell the user what's new in each.
+
+This can be executed at the project level or the sidl entity level. package level compares would be
+an iterator over all in-project symbols.
+
+This is only required to compare like-plugin projects.
+
+Probably this can be made cross-plugin aware if all queries about sidl and impl files are routed
+through shell queries for paths instead of assuming identical plugins, but in the most general case,
+the bocca under which the VC controlled source tree is not necessarily even installed on the
+machine where diff is run, so diff should be current-vs-disk only until further notice.
+
+Comparisons:
+sidl files by content of splicer blocks under like sidl names.
+impl files by content and names of splicer blocks under like sidl names.
+BOCCA/$proj.defaults files.
+non-boilerplate files found in trees, excluding objects.
+
+args:
+bocca diff symbol|project --base=project_root \
+--sidl (sidl only)
+--brief show summary, not detailed diff
+--diff-opts (opts passed to diff utility, recursion excluded)
+--impl (mod+code, hdr+code only)
+-m (headers only)
+-i (code only)
+--build (aux files only)
+--no-ignore (otherwise anything matching a pattern in .ignore in either current or base tree is skipped).
+--ignore-filename=ignore-patterns-file: by default .cvsignore and .ignore are used.
+--update-base move compatible impl changes detected in project over to base
+--update-current move spliced changes detected in base directory over to current project; reject propagating any block which appears to be boilerplate impl.

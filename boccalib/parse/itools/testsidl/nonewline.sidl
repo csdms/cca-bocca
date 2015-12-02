@@ -1,0 +1,5 @@
+package old version 1.0 {
+interface Func {
+int poomba();
+}
+}

@@ -1,0 +1,89 @@
+#!/usr/bin/env python
+""" extract
+   A text utility for munging babel impls and related files.
+   Author: Benjamin Allan
+   Org:	Sandia National Laboratories, Livermore
+   Date: 11/2006.
+   License: GPL. Of course this doesn't affect the files that
+	are processed by this utility.
+
+The extract algorithm is:
+	Load inputFile
+	Identify input sections matching sourceKey and extract symbols
+		from sourcekey.begin(symbol)/sourcekey.end(symbol) pairs.
+		Errors if sections are not well-formed.
+	Foreach matching key, generate or append a splice file if not a dryrun.
+
+"""
+import sys
+import os.path
+import distutils.sysconfig
+
+def warnMessage(message, opts):
+    print "Warning: " , message
+    if opts.fatal:
+        sys.exit(3)
+
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+# FIX BOCCA PATH. We end up doing this in every python script. maintenance hassle.
+#
+bocca_self = os.path.realpath(sys.argv[0])
+bocca_tools_bin = os.path.dirname(bocca_self)
+libdirname = distutils.sysconfig.get_config_var('LIB')
+if libdirname is None: libdirname = 'lib' # for python versions < 2.5
+
+try:
+    boccalibPath = os.path.abspath(os.path.join(bocca_tools_bin, '..', libdirname,
+                                    'python' + distutils.sysconfig.get_python_version(),
+                                    'site-packages', 'boccalib'))
+    subcmdModulePath = os.path.join(boccalibPath, 'cct')
+    sys.path.append(boccalibPath)
+    sys.path.append(subcmdModulePath)
+except:
+    print 'bocca: Cannot locate bocca module path.'
+    exit(1)
+
+# print >> sys.stderr, "python path is:"
+# print >> sys.stderr, sys.path
+
+import cct._modulePath
+cct._modulePath.setModulePath(boccalibPath)
+
+# now we can import ok.
+from splicers.ExtractData import *
+from splicers.Source import *
+
+def main(argv=None):
+    if argv is None:
+        argv = sys.argv
+    try:
+        opts, args = parseargs(argv)
+
+        if not validateOpts(opts):
+            print "Got invalid options somehow"
+            return 1
+
+        if opts.dbg :
+            printopts(opts)
+    
+        inName = opts.inputFile
+        if inName == "unset":
+            inName = args[1]
+        if len(opts.vpathDir) > 0:
+            inName = os.path.join(opts.vpathDir , inName)
+
+        source = Source()
+        source.loadFile(inName, opts.sourceKey)
+        
+        return source.writeExtracts(opts.sourceKey, opts)
+
+    except Usage, err:
+        print >>sys.stderr, err.msg
+        print >>sys.stderr, "for help use --help"
+        return 2
+
+if __name__ == "__main__":
+    sys.exit(main())

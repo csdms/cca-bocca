@@ -1,0 +1,59 @@
+# Edit the variables below to specify the correct values for your system.
+
+# The ccafe-config executable. Specify a full-path name if ccafe-config is 
+# not in your default search path. This can also be set with 
+# the --with-ccafe-config configure option
+CCAFE_CONFIG = /Users/norris/cca/1.0.8-nightly-mpich/bin/ccafe-config
+
+# Top-level project source directory
+PROJECT_TOP_DIR = @PROJECT_TOP_DIR@
+
+# Installation prefix, can be only set with the --prefix configure option.
+prefix = /Users/norris/cca/1.0.8-nightly-mpich
+PACKAGE_TARNAME=bocca
+exec_prefix = ${prefix}
+libdir = ${exec_prefix}/lib
+bindir = ${exec_prefix}/bin
+datarootdir = ${prefix}/share
+includedir= ${prefix}/include
+docdir=${datarootdir}/doc/${PACKAGE_TARNAME}
+PROJECT_NAME=@PROJECT_NAME@
+
+# Setting the languages manually is not recommended; if left empty
+# the USER_LANGUAGES variable will result in generation of clients for
+# all languages supported by your installation of the CCA spec and Babel.
+# Languages can also be specified with the --languages configure option.
+USER_LANGUAGES = c cxx f77 f90 java python
+
+# The INSTALL_LANGUAGES variable can be used to override the default 
+# languages (all Babel-supported languages) for which clients are generated
+# and installed during 'make install'
+INSTALL_LANGUAGES = c cxx f77 f90 java python
+
+# Number of make jobs to run simultaneously for independent buils, such
+# as the port client libraries for different languages. Do not set this
+# to more than the number of CPUs or cores available. Valid settings 
+# are of the form -j#, where # is the number of parallel make jobs, e.g., -j2.
+# Comment this out or set to an empty string to disable parallel make jobs.
+PMAKE_OPTS = -j 2
+
+
+#--------------------------------------------------------------------
+# User configure results. Begin.
+#--------------------------------------------------------------------
+
+# Insert configure output variables here
+
+#--------------------------------------------------------------------
+# User configure results. End.
+#--------------------------------------------------------------------
+
+# ----- The following settings should not need modification except in rare cases
+
+EXTRA_PYTHON_LIBS = 
+
+USE_MPI= $(shell ${CCAFE_CONFIG} --var CCAFE_USEMPI)
+
+# enable various levels of noise by makeing HIDE_COMPILE/HIDE_LIBTOOL empty
+HIDE_LIBTOOL=@
+HIDE_COMPILE=--quiet

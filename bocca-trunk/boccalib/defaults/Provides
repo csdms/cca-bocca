@@ -1,0 +1,15 @@
+; # this is a template provides port metadata file
+; # there is no instance name property because it is encoded in the filename.
+; # as Provides.componentclassname.instancename
+Type: @SIDLINTERFACENAME@
+Dynamic: false
+
+[PortProperties]
+MIN_CONNECTIONS: 0
+MAX_CONNECTIONS: 0
+ABLE_TO_PROXY: true
+
+[ImplInfo]
+Delegated: false
+DelegateClass: @DELEGATESIDLCLASS@
+

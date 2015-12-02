@@ -1,0 +1,51 @@
+
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+ECHO_N=@ECHO_N@
+
+TESTS=$(shell ls test_*sh)
+BOCCA=@bindir@/bocca
+
+all:
+	@echo running $(TESTS)
+	-$(RM) *.out
+	-$(RM) -r scratch
+	mkdir scratch
+	@-for i in $(TESTS); do \
+		echo $(ECHO_N) RUNNING $$i "-------------- "; \
+		start=`date +%s`; \
+		./$$i $(BOCCA) `pwd`/scratch > $$i.out 2>&1 ; \
+		stop=`date +%s`; \
+		echo $(ECHO_N) "(took `expr $$stop - $$start`) " ; \
+		grep -E 'PASS|FAIL|BROKEN' $$i.out; \
+	done
+	cat test_z_harness.sh.out
+
+component:
+	-$(RM) -r scratch
+	mkdir scratch
+	@-for i in $(shell ls test_*component*.sh) ; do \
+		echo $(ECHO_N) RUNNING $$i "-------------- "; \
+		start=`date +%s`; \
+		./$$i $(BOCCA) `pwd`/scratch > $$i.out 2>&1 ; \
+		stop=`date +%s`; \
+		echo $(ECHO_N) "(took `expr $$stop - $$start`) " ; \
+		grep -E 'PASS|FAIL|BROKEN' $$i.out; \
+	done
+
+ONETEST=test_tut_2.sh
+one:
+	-$(RM) -r scratch
+	mkdir scratch
+	@-for i in $(ONETEST) ; do \
+		echo $(ECHO_N) RUNNING $$i "-------------- "; \
+		start=`date +%s`; \
+		./$$i $(BOCCA) `pwd`/scratch > $$i.out 2>&1 ; \
+		stop=`date +%s`; \
+		echo $(ECHO_N) "(took `expr $$stop - $$start`) " ; \
+		grep -E 'PASS|FAIL|BROKEN' $$i.out; \
+	done
+
+clean:
+	-$(RM) -r *.out scratch
+

@@ -1,0 +1,7 @@
+; this is a template cca port metadata file.
+; # there is no Name stored as it is encoded in the filename
+; # Port.fullsidlclassname
+Summary: @SUMMARY@ ; # short doc string
+SidlFiles: @SIDLPATH@ ; # where we keep the sidl description. normally .
+
+[Properties]

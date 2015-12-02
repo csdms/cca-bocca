@@ -1,0 +1,84 @@
+/**
+ * Define a set of useful interfaces and a CCA port to perform units
+ * transformations. For example, you can convert miles to kilometers.
+ */
+package units version 1.0 {
+
+  interface UnknownUnitException extends sidl.BaseException
+  {
+  }
+
+  /**
+   * A simple interface to a unit of measurement.
+   */
+  interface Unit {
+
+    /** Return the name of the unit */
+    string name();
+
+    /** 
+     * Return the conversion factor to SI units. The return values
+     * should satisfy the relation <value in SI units> = <value in
+     * Unit units> * slope + offset.
+     */
+    void conversionFactors(out double slope, out double offset);
+  }
+
+  /**
+   * This interface knows now to convert from one unit to another.
+   * For example, you could have one of these to convert from
+   * kilometers to miles.
+   */
+  interface Conversion {
+
+    /**
+     * Return the unit that this Conversion interface will convert
+     * from.
+     */
+    Unit convertFrom();
+
+    /**
+     * Return the unit that this interface will convert to.
+     */
+    Unit convertTo();
+    
+    /**
+     * Convert a physical quantity from old set of units to another.
+     */
+    double convert(in double orig);
+  }
+
+  interface UnitsLibrary extends gov.cca.Port
+  {
+    /**
+     * Generate conversion factors for a pair of units.
+     */
+    Conversion lookupConversion(in Unit src, in Unit dest);
+
+    /**
+     * Define a new unit. Units defined are automatically
+     * registered in the library. slope and offset should
+     * be defined so that <value in knownUnit> = slope *
+     * <value in newUnit> + offset.
+     */
+    void defineUnit(in string name,
+                    in double slope,
+                    in double offset,
+                    in  Unit  knownUnit,
+                    out Unit  newUnit);
+
+    /**
+     * Transform a Conversion interface to convert values in the 
+     * opposite direction. Note this can modify or replace the 
+     * incoming parameter.
+     */
+    void invertConversion(inout Conversion convert);
+
+    /**
+     * Lookup a unit definition. If no matching unit is found,
+     * the UnknownUnitException is thrown.
+     */
+    Unit lookupUnit(in string name) throws UnknownUnitException;
+  }
+}
+

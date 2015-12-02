@@ -1,0 +1,47 @@
+# This is an empty stub for the user to add extra targets
+# to the toplevel build, like doc.
+# The following targets are reserved to bocca:
+#	 all, check_top_dir, check, clean, distclean, install, install_local, install-all,
+#    debug, .gencode, .msg, .PHONY
+# 
+# All user-defined variables should be prefixed with something project
+# related. We will dispatch to the following user-defined targets:
+
+# The user may extend our set of phony targets by defining USER_PHONY in make.vars.user
+
+# before our build
+pre-build-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# after our build (note the necessary :: for this rule since it's also defined 
+# in the top-level Makefile to ensure proper dependency handling)
+post-build-user::
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# before our install
+pre-install-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# after our install 
+post-install-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# after our check
+check-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# after our clean
+clean-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+
+# after our distclean
+distclean-user:
+	$(dprint) "Build hook $@ in $(MYDIR) started"
+	$(dprint) "Build hook $@ in $(MYDIR) completed"
+

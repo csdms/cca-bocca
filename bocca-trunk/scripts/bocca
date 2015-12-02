@@ -1,0 +1,490 @@
+#!/usr/bin/env python
+
+# by Benjamin Allan, Sandia Laboratories, Livermore, Feb. 2007,
+#    Boyana Norris, Argonne National Laboratory, Mar. 2007.
+
+# Overview:
+# The job of this script is to check the environment and dispatch to
+# the real utilities, which may be installed on a per-project basis.
+# The environment dispatched may be modified to enable debugging with:
+# BOCCA_DEBUG [0] 1
+#
+# and this launch script will append the location of bocca modules 
+# to Python's sys.path.
+
+# This script is most emphatically *NOT* for storing any data
+# that is related to a specific project, including which specific
+# other cca installed directories a project depends on, like babel, cca-spec,
+# or dccafe.
+
+# The algorithm is:
+# a) determine the project and boccalib to use.
+# b) dispatch the rest of the args to that implementation.
+
+# Algorithm for (a) is:
+# - if `pwd` is has existing project(s)
+# -- find boccalib-PROJ for the project (alg c).
+# - else 
+# -- use the default boccalib installed with this script.
+
+# Note that we have a requirement for overlayment and clone-by-cp
+# That implies the resource config files and anything which would
+# otherwise be ambiguous must include the project name in filenames.
+# 
+# This bit make normal things easy and hard things (overlay, copy)
+# possible.
+# Algorithm c: What is the project(s) for the current directory?
+# - Does BOCCA/ exist? Yes, continue, no, nolib.
+# - Does BOCCA/Root-* exist? Yes continue, no, exit with warning.
+# - Is BOCCA/Root-* unique? 
+#    No, is -p given or in env to disambiguate?
+#        Yes,  continue.
+#        No, exit with warning about overlaid projects and -p usage.
+#     Yes, continue
+# - find root dir implied in BOCCA/Dir-$PROJ
+# - verify that dir-PROJ brings us back here from there.
+# - check there for boccalib-$proj.
+# - Yes, take it, no, result is default boccalib accessible from our bin.
+
+# Critical usage note:
+# Packages which are overlaid must all depend on the same boccalib
+# if they are overlaid at the same root unless we name with -$PROJ. 
+# By default, boccalib should NOT be copied into a developers tree--
+# it should (optionally) be copied into a deployment bundle when
+# "exporting" a project. We go with the boccalib-$PROJ approach.
+# 
+# In particular in overlay situations we must *not* assume that
+# the user intended to use another project's local bocca version,
+# which may be ancient. We may at a point consider adding an
+# option to allow specification of this, however.
+
+# ok, so get on with it.
+
+"""The dispatcher to bocca subjects and utility libraries.
+
+Usage: %(program)s [options] <verb> <subject> [subject options] [subject args]
+
+
+Options:
+
+    --project PROJECTNAME
+    -p PROJECTNAME
+        Give the project to which the verb will be applied.
+        The project must already exist in the local directory.
+        Normally there is only one project per directory and -p may be omitted.
+
+    --version
+    -V
+        Print the version numbers and exit.
+
+    --debug
+    -d
+        Turn on debugging prints.
+
+    
+    --help
+    -h
+        Print this message and exit.
+
+    help - dispatches into the help subsystem.
+
+Version: %(__version__)s
+
+All subjects support the subject option --help for specific help.
+"""
+# ----------------------------------------------------------------
+
+# By default, Python deprecation warnings are disabled, define the CCA_TOOLS_DEBUG env. variable to enable
+try:
+    import warnings
+    if not ('BOCCA_DEBUG' in os.environ.keys() and os.environ['BOCCA_DEBUG'] == '1'): 
+        warnings.filterwarnings("ignore", category=DeprecationWarning)
+except:
+    pass
+
+# ----------------------------------------------------------------
+import signal 
+import sys, os
+def signal_handler(signal, frame):
+    print >>sys.stderr, 'Bocca ERROR: user interrupt'
+    if 'BOCCA_DEBUG' in os.environ.keys() and os.environ['BOCCA_DEBUG'] == '1': 
+        import traceback
+        traceback.print_stack()
+    sys.exit(1)
+signal.signal(signal.SIGINT, signal_handler)
+
+import distutils.sysconfig
+import string
+import errno
+import getopt
+import glob
+import imp
+
+program = sys.argv[0]
+# note: bocca version X must be updated manually as part of the release process.
+# note: subversion revision Y must be updated manually as part of the release process.
+# svnversion at the top of a clean checkout of trunk to get the overall subversion revision
+__version__ = """bocca version 0.5.0
+subversion revision > 1230
+last modified: 2007-11-14 11:57:40 -0600 (Wed, 14 Nov 2007)
+unstable release
+"""
+
+
+class Devnull:
+    def write(self, msg): pass
+    def flush(self): pass
+
+
+DEBUGSTREAM = Devnull()
+NEWLINE = '\n'
+EMPTYSTRING = ''
+COMMASPACE = ', '
+
+# ------------------- options and common data and constants------------
+# Putting all the important local constants also into the options
+# object so they may be easily adjusted for spelling.
+class Options:
+# where the actual scripts live.
+# this is initialized to the default from the tools installation
+# and reset to that of the project-specific tools if they exist.
+    bocca_tools_bin = 'unset'
+# project will be detected if appropriate
+    project = None
+    metadir = 'BOCCA'
+# all the prefixes are suffixed with projname
+    dirfileprefix = 'Dir-'
+    rcfileprefix = 'bocca_rc-'
+    toolsname = 'boccalib'
+    toolsprefix = toolsname + '-'
+    launcher = 'cct'
+# we assume we are in some project until proven otherwise
+# by testing for BOCCA dir.
+# It may not be the project the user wants, however.
+    havedotbocca = 1
+    debug = 0
+# true if we detect that the project the user wants
+# already exists. Means Root-PROJNAME was found already.
+    projectexists = 0
+    otherargs = ''
+
+# -------------------------------------------------------------------
+
+def usage(code, msg='', exit=True):
+    print >> sys.stderr, __doc__ % globals()
+    if msg:
+        print >> sys.stderr, msg
+    if exit:
+        sys.exit(code)
+    else:
+        return code
+    
+# this function must not return. must exit.
+def versage(code, msg=''):
+    try:
+        import boccaversion
+        __version__ = boccaversion.__version__
+    except:
+        print 'could not import boccaversion module (likely bocca was not configured or installed properly)'
+        __version__ = 'unknown version'
+        code = 1
+    print >> sys.stderr, __version__
+# To disambiguate library dir we'd use otherwise and print its version too,
+# do 'bocca version'. version is a subject.
+    sys.exit(code)
+
+# this function must not return. must exit.
+def ambiguity(dir, pat, list):
+    print 'More than one project found in ', dir
+    print 'Use -p PROJECT to specify. Existing projects detected:'
+    for r in roots:
+        proj = r.replace(rootpattern, "", 1)
+        print proj
+    sys.exit(2)
+    
+# this function must not return. must exit.
+def readerror(file, msg):
+    print msg
+    print file
+    sys.exit(3)
+
+# -------------------------------------------------------------------
+# return (status,line) the first line of the named file as part of tuple.
+# status: 0 if successful, 1 if not.
+def oneLineFile(filename):
+    line=""
+    try:
+        f = open(filename, 'r')
+        line = f.readline()
+        f.close()
+    except:
+        return (1,"")
+    return (0,line)
+
+
+# -------------------------------------------------------------------
+# Return the absolute path of root derived from input dir (pwd typically)
+# and the relativeName of pwd (by backing up the path)
+# If the inputs are inconsistent with the filesystem is not checked.
+# If curdir is inconsistent with relativePath is not checked. Erroneous
+# input tends to end up with / as the answer.
+def rootPath(abscurdir, relativeName):
+    rlist = os.path.split(os.path.normpath(relativeName))
+    root = abscurdir
+    while rlist[1] != '' and rlist[1] != '.':
+        tail = rlist[1]
+        rlist = os.path.split(rlist[0])
+        newroot= os.path.split(root)[0]
+        root = newroot
+    return root
+        
+
+# ----------------------------------------------------------------
+# return (status, topdir) where:
+# status:
+#    0 we are where we say we are. topdir=something
+#    > 0, error. topdir="error message"
+#    1 we are not where we say we are
+#    3 dirfile not exist or readable
+#    4 topdir not exist
+#    5 working dir not exist
+#    6 topdir is not bocca-managed
+#    7 topdir is not managing this project
+#
+def verifyTop(dirfile, dir, options):
+
+# is BOCCA/Dir-PROJ ok?
+    status, subdir = oneLineFile(dirfile)
+    if status:
+        msg = dirfile
+        msg += " unreadable"
+        return(3,msg)
+    subdir = subdir.strip()
+    print >> DEBUGSTREAM, 'read from ', dirfile, ": ", subdir
+    topdir = rootPath(dir,subdir)
+    print >> DEBUGSTREAM, 'compute topdir is: ', topdir
+    if not os.path.isdir(topdir):
+        msg = topdir
+        msg += " project top does not exist"
+        return(4,msg)
+# does where we think we are even exist?
+    target = os.path.join(topdir, subdir)
+    if not os.path.isdir(target):
+        msg = target
+        msg += " project subdirectory does not exist"
+        return(5,msg)
+# is the top managed at all?
+    topboccadir = os.path.join(topdir, options.metadir)
+    if not os.path.isdir(topboccadir):
+        msg = topdir
+        msg += " is not a bocca directory. Something broken."
+        return(6,msg)
+# Is the top part of us?
+    topdirfile = os.path.join(topdir, options.metadir, options.dirfileprefix)
+    topdirfile += options.project
+    if not os.path.exists(topdirfile):
+        msg = topdir
+        msg += " is not managing project "
+        msg += topdirfile
+        return(7,msg)
+# are we where we think we are?
+    if not os.path.samefile(target,dir):
+        msg = "Bocca-controlled directory was incorrectly copied or moved.\n"
+        msg += target
+        msg += "\nis not the same as current directory\n" 
+        msg += dir
+        return (1,msg)
+    return (0,topdir)
+    
+# ----------------------------------------------------------------
+def parseargs():
+    global DEBUGSTREAM
+
+    try:
+        opts, args = getopt.getopt(
+            sys.argv[1:], 'Vvhp:d',
+            ['project=', 'version', 'help', 'debug'])
+    except getopt.error, e:
+        usage(1, e)
+
+    options = Options()
+    msg = "User-specified project not found in this directory.\nDid you mean to bocca init " 
+    # find the dir of us (and thus the default tools bin)
+    options.otherargs=[]
+    bocca_self = os.path.realpath(sys.argv[0])
+    options.bocca_tools_bin = os.path.dirname(bocca_self)
+    options.showversion = False
+    options.helponly = False
+    for opt, arg in opts:
+        if opt in ('-h', '--help'):
+            #usage(0, exit=False)
+            options.helponly = True
+            options.otherargs.insert(0,'help')
+        elif opt in ('-V', '--version', '-v'):
+            options.showversion = True
+        elif opt in ('-p', '--project'):
+            dirfile = os.path.join(os.getcwd(), options.metadir, options.dirfileprefix)
+            dirfile += arg
+            if not os.path.exists(dirfile):
+                msg += arg
+                msg += '? No file:'
+                readerror(dirfile, msg)
+            options.project = arg
+            options.projectexists = 1
+        elif opt in ('-d', '--debug'):
+            DEBUGSTREAM = sys.stderr
+            options.debug = 1
+    options.otherargs.extend(args)
+    print >> DEBUGSTREAM, args
+    return options
+
+# ----------------------------------------------------------------
+
+def getBoccaPkgDir(prefix=None):
+    """Return the full path to the site-packages directory under the 
+    Bocca installation prefix (standard distuitls installation).
+    
+    If 'prefix' is supplied, use it instead of the computed location
+    of the installed bocca script.
+    """
+    
+    if prefix is None:
+        prefix = os.path.dirname(os.path.dirname(os.path.realpath(sys.argv[0]))) # Bocca installation location
+
+    libdirname = distutils.sysconfig.get_config_var('LIB')
+    if libdirname is None: 
+        # True for python versions < 2.5
+        libdirname = 'lib'
+    thedir =  os.path.join(prefix,libdirname,'python' + distutils.sysconfig.get_python_version(), 'site-packages', 'boccalib')
+    newdir=''
+
+    if not os.path.exists(thedir):
+        files = []
+        # Look for the parent of site-packages
+        for file in os.listdir(prefix):
+            fulldir = os.path.join(prefix, file)
+            if os.path.isdir(fulldir):
+                for x in os.listdir(fulldir):
+                    if os.path.isdir(os.path.join(fulldir,x)):
+                        if x.startswith('python' + distutils.sysconfig.get_python_version()):
+                            fulldir = os.path.join(fulldir, x)
+                        elif x == 'python': 
+                            fulldir = os.path.join(fulldir, x)
+                        else: continue
+                        for y in os.listdir(fulldir):
+                            if y == 'site-packages':
+                                newdir =  os.path.join(fulldir, 'site-packages', 'boccalib')
+                                break 
+            if newdir: 
+                thedir = newdir
+                break
+    print >>DEBUGSTREAM, 'The Bocca module directory is', thedir
+    if not os.path.exists(thedir):
+        print >> sys.stderr, 'Cannot find the location where Bocca modules have been installed, please add the path to your PYTHONPATH environment variable.'
+        sys.exit(1)
+
+    theparent = os.path.dirname(thedir)
+    return (thedir, theparent)
+
+
+# This function must not return.
+# It must exit the interpreter with the exit code of the
+# bin/cct it called.
+# Cases:
+# bocca init A : # the normal case
+# bocca init B ; # where we are already in a dir with proj A
+# bocca * ;# where nothing is defined. Trapping it not ours to do.
+# bocca * where files are inconsistent.
+# The following cannot occur (filtered at parseargs)
+# bocca -p B init ; # where we are already in a dir with proj A but not B
+# bocca -p A othercommand ; # where project A is not defined
+#
+
+def dispatch(options):
+    '''Top-level Bocca dispatcher. It takes the command line options, which are of the 
+    form "action object options", where "action" is one of create/remove/change/rename, and 
+    "object" is what the action is applied to, e.g., project, interface, class, port, 
+    component, library. The "options" are passed unchanged to the subject being dispatched to.
+    '''
+    # Transferred from cct and modified to work here
+    # prog = sys.argv[0]
+
+    argv=options.otherargs
+ 
+    if len(argv) < 1 and not options.showversion and not options.helponly:
+        usage(1,'Error: Bocca requires a verb and subject, or one of "help, display, config".')
+    if (not options.showversion) and (not options.helponly) \
+        and len(argv) < 2 and argv[0] != 'help' and argv[0] != 'display' \
+        and argv[0] != 'config' and argv[0] != 'version':
+        usage(1,'Error: Bocca requires a verb and subject, or one of "help, display, config".')
+ 
+    os.environ['BOCCA_DEBUG'] = str(options.debug)
+
+    libdirname = distutils.sysconfig.get_config_var('LIB')
+    if libdirname is None: libdirname = 'lib' # for python versions < 2.5
+
+    try:
+        (boccalibPath, boccalibParent) = getBoccaPkgDir()
+        subcmdModulePath = os.path.join(boccalibPath, 'cct')
+        sys.path.append(boccalibPath)
+        sys.path.append(subcmdModulePath)
+        sys.path.append(boccalibParent)
+
+        #sys.path.append(os.path.abspath(os.path.join(options.bocca_tools_bin, '..', getModulesDir())))
+        print >> DEBUGSTREAM, 'bocca module path (computed): ', subcmdModulePath
+
+    except:
+        print 'Bocca ERROR: Cannot locate module path, will not be able to load subjects'
+        return 1
+
+    if options.showversion:
+        versage(0)
+    
+    
+    # Invoke the cct dispatcher to dispatch the command
+    (file,filename,description) = imp.find_module('dispatcher',[subcmdModulePath])
+    mod = imp.load_module('dispatcher', file, filename, description)
+    dispatchMethod = getattr(mod,'dispatch')
+    
+    result = dispatchMethod(argv=argv, projectName=options.project, modulePath=boccalibPath, boccaprog=program)
+
+    sys.exit(result)    
+
+if __name__ == '__main__':
+    
+    options = parseargs()
+
+# not in an existing bocca dir. pass on args and hope user is calling init.
+    dir = os.getcwd()
+    boccadir = os.path.join(dir, options.metadir)
+    print >> DEBUGSTREAM, 'BOCCA:', boccadir
+    if not os.path.exists(boccadir):
+        options.havedotbocca = 0
+        print >> DEBUGSTREAM, 'BOCCA not there'
+        dispatch(options)
+
+# check boccadir/Dir-* and error or pick. avoid chdir always.
+    if options.project == None:
+        dirpattern = os.path.join(boccadir, options.dirfileprefix)
+        globpattern = dirpattern
+        globpattern += '*'
+        dirs = glob.glob(globpattern)
+        size = len(dirs)
+        if len(dirs) > 0:
+            print >> DEBUGSTREAM, dirs[0]
+    if size > 1:
+        ambiguity(dir, dirpattern, dirs)
+
+    if size < 1 and (not options.showversion) and ('help' not in options.otherargs) and ('config' not in options.otherargs) and not ('create' in options.otherargs and 'project' in options.otherargs):
+        readerror(dir, "Broken BOCCA dir; no Dir- project files")
+        options.project = dirs[0].replace(dirpattern, "", 1)
+        options.projectexists = 1
+        print >> DEBUGSTREAM, 'existing proj=', options.project
+    else:
+        print >> DEBUGSTREAM, 'given -p proj=', options.project
+
+    dispatch(options)
+
+# NOTREACHED
+    print 'logic error in dispatcher called with:', sys.argv
+    exit(1)

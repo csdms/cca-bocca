@@ -1,0 +1,115 @@
+Markup directives.
+
+So distilled from the bocca.xml exercise is a desire to do something equivalent
+but better based on tex (and python if need be).
+
+What they did (t.o.c):
+
+1) unconditional shell command named block with output capture.
+2) modal shell command named block with output capture.
+3) block replacement with named shell command output.
+4) modal block replacement with named shell command output.
+5) block replacement with named sidl file.
+6) sidl file-by-symbol splicing into named bocca splicer block.
+7) block replacement with full method extracted from impl file of named symbol.
+8) impl file-by-symbol,method splicing into named babel splicer block.
+                                                                    
+
+Here are the tags that developed in bocca.xml and what they did:
+
+(0) docbook tags
+<screen></screen> display the enclosed text line-for-line in the output, where
+xml markup tags disappear or have rendering side effects but line-ends are preserved religiously
+
+<userinput></userinput> bold/highlight(colorized) user input text rendered line for line and
+suitable for mouse cut/paste within screen mode.
+
+<computeroutput> <computeroutput> render the enclosed text line4line within screen mode.
+
+(1)
+<!--hog.splicer.begin(bocca.cmd.#N) -->
+text
+<!--hog.splicer.end(bocca.cmd.#N) -->
+The lines in text get executed in the default shell
+and the result stored indexed by #N.
+
+(3)
+<!--hog.splicer.begin(bocca.reply.#N) -->
+text2
+<!--hog.splicer.end(bocca.reply.#N) -->
+The lines in text2 get replaced with the captured output of the
+matching bocca.cmd.#N.
+
+(2)
+<!--hog.splicer.begin(bocca.cmd.$LANG.#N) -->
+text
+<!--hog.splicer.end(bocca.cmd.$LANG.#N) -->
+The lines in text get executed in the default shell
+if in $LANG mode and the result stored indexed by #N.
+
+(4)
+<!--hog.splicer.begin(bocca.reply.$LANG.#N) -->
+text2
+<!--hog.splicer.end(bocca.reply.$LANG.#N) -->
+The lines in text2 get replaced with the captured output of the
+matching bocca.cmd.#N if in $LANG mode.
+
+
+(5)
+<!-- hog.splicer.begin(insert-sidl-file.$PARTIALSYMBOL) -->
+stext
+<!-- hog.splicer.end(insert-sidl-file.$PARTIALSYMBOL) -->
+Resolve PARTIALSYMBOL to filesystem location and stuff sidl text file
+from filesystem in place of stext.
+
+(6)
+<!-- hog.splicer.begin(insert-sidl-file.$PARTIALSYMBOL.append.$CTAG.to.pkg_symbol_methods) -->
+...
+<!-- hog.int.splicer.begin($CTAG) -->
+mtext
+<!-- hog.int.splicer.end($CTAG) -->
+...
+<!-- hog.splicer.end(insert-sidl-file.$PARTIALSYMBOL.append.$CTAG.to.pkg_symbol_methods) -->
+Find sidl file for $PARTIALSYMBOL. In it, find bocca splicer block for pkg.symbol.methods.
+In that block append mtext. mtext may have to be filtered for markup tags.
+
+
+(7)
+<!-- hog.splicer.begin(insert-impl-excerpt.$LANG.$PARTIALSYMBOL.$METHOD) -->
+text
+<!-- hog.splicer.end(insert-impl-excerpt.$LANG.$PARTIALSYMBOL.$METHOD) -->
+If in mode $LANG, resolve $PARTIALSYMBOL to impl file and extract the full
+method named, including method signature. Replace text with extracted method.
+
+
+(8)
+<!-- hog.splicer.begin(insert-impl-excerpt.$LANG.$PARTIALSYMBOL.internal.$METHOD) -->
+...
+<!-- hot-int.splicer.begin($SIDL_SYMBOL)
+itext
+<!-- hot-int.splicer.end($SIDL_SYMBOL)
+...
+<!-- hog.splicer.end(insert-impl-excerpt.$LANG.$PARTIALSYMBOL.internal.$METHOD) -->
+If in mode $LANG, resolve $PARTIALSYMBOL to impl file and locate the
+method named. Replace babel splicer block content of the method with itext.
+itext may contain markup that must be filtered out on the way to impl file.
+
+
+Notes:
+It is not an error to have a reply go unused.
+
+The entire file and all its cmds are executed before substitution of replies.
+
+#N must be unique, but otherwise any digits are allowed. Scaling this to
+complex documents requires assigning number ranges and people keeping track of it.
+A more general solution would be better. Warnings about duplicates are needed.
+
+It is important not to induce extra whitespace when splicing.
+
+In general, markup features that don't work as code and code features that done't work as markup
+make filtering on all reads/writes needed.
+
+Does not handle well the cases where there is default rather than splicer code that
+is hand modified, e.g. user portion of go() skeleton. Need to either rethink the
+generated go code or improve the markings around user expected mods for go to be
+machine spliceable.

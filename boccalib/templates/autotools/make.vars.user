@@ -1,0 +1,38 @@
+# This file contains user-specified project-wide
+# These will be applied when building all code
+# as appropriate.
+# Only set those which are necessary for every component and port.
+# The evenytual normal way to set/reset these variables is using the
+# bocca config CLASSNAME --var=VARUSER --value=VALUE
+# which is not yet implemented.
+# --------------------------------------------------------------
+# Include path directives, including paths to Fortran modules
+project_INCLUDES = -I/BOCCA_TOP_MAKE_VARS_USER_SEEN_INC
+
+# Library paths and names
+# binaries
+project_LIBS = -L/BOCCA_TOP_MAKE_VARS_USER_SEEN_LIB
+# java 
+project_CLASSPATH=
+# python
+project_PYTHONPATH=
+
+# Optional additional compiler flags (Note: many compiler flags are only weakly portable)
+# Removing $(BOCCA_IO_FLAGS) from the build options will turn off all 
+# bocca-generated print statements for c, c++, and f90 preprocessor.
+# It may reduce the precision of locations reported in exception messages for c++.
+# print statements for java, f77, and python are controlled by the component private data
+# bocca_print_errs.
+# f90 preprocessor flags
+project_FPPFLAGS= 
+# f77 preprocessor flags
+project_F77PPFLAGS=
+# compiler flags
+project_CFLAGS=   
+project_CXXFLAGS= 
+project_F90FLAGS= 
+project_F77FLAGS= 
+project_JAVAFLAGS= 
+
+# Additional phony targets defined by users (the initial targets in make.rules.user are already included)
+USER_PHONY = 

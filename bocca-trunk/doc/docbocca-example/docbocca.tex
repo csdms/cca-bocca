@@ -1,0 +1,349 @@
+\documentclass{article}
+
+
+\usepackage[usenames,dvips]{color}
+\usepackage{colordvi}
+\usepackage{html}
+
+%% 
+% Macros aimed at hog production.
+% These can be tailored otherwise.
+%%
+\def\prompt{\#}
+\def\usershell#1{\larger \prompt \framebox{\texttt{\textcolor{Blue}{#1}}} \smaller }
+
+%% 
+% Some things have to be remapped for latex2html to work or be less whiny.
+% In html mode, do nothing with bShell.
+% In html mode. all files must exist or we take the error.
+% 	latex itself is smarter and pdfs get the message in red.
+% In html, usershell has to be redone tml to get it snazzy
+% Do not split the next lines in the htmlonly block here!
+%% 
+\begin{htmlonly}
+  \usepackage{verbatim}
+  \providecommand{\bShell}[2][]{}
+  \providecommand{\IfFileExists}[3]{#2}
+  \def\usershell#1{\begin{rawhtml}<table frame="border"><tr><td>\end{rawhtml}\prompt \begin{rawhtml}</td><td bgcolor="yellow"><b>\end{rawhtml}{\texttt{\textcolor{Blue}{#1}}}\begin{rawhtml}</b></td></tr></table>\end{rawhtml} }
+\end{htmlonly}
+
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[DIV15]{typearea}
+\usepackage{tobiShell}
+\usepackage{comment}
+\usepackage{relsize}
+
+
+
+\parindent0pt
+\parskip1pt
+\begin{document}
+\title{Docbocca}
+\author{Benjamin Allan}
+\maketitle
+\tableofcontents
+
+\section{Introduction}
+\label{sec:intro}
+We enable the execution of external commands with the
+help of the \TeX{} command line option \texttt{-shell-escape} (see
+section \ref{sec:usage}). Handling shell calls in tex is made easy
+by use of tobiShell.sty. Basic colored region handling for both
+web and pdf is handled with \textcolor{blue}{textcolor}, but coloring
+embedded in verbatim blocks requires extra effort and sets off the colored areas
+with latex or latex2html paragraph breaks.
+
+Inlined shell code is written to temporary files and the external program is called with the
+file name of the temporary script as the last command line argument.
+Execution is immediate so that output files can be included as
+part of the tex document following the directive that generates them.
+
+The default external program is the \texttt{bash}-shell. You may
+easily change the default program (e.g. to gnuplot) or specify some
+other executable (env to make environment variable settings) for a given inline script.
+
+\section{Functionality goals}
+\label{sec:goals}
+Our goal is to support the bocca.xml style splicing, but in a more
+self-evident, extensible (and tex compatible) markup. Processing bocca.xml 
+required:
+\begin{enumerate}
+\item unconditional shell command named block with output capture.
+\item modal shell command named block with output capture.
+\item block replacement with named shell command output.
+\item modal block replacement with named shell command output.
+\item block replacement with named sidl file.
+\item sidl file-by-symbol splicing into named bocca splicer block.
+\item block replacement with full method extracted from impl file of named symbol.
+\item impl file-by-symbol,method splicing into named babel splicer block.
+\end{enumerate}
+
+Along with reprocessing for every babel language in use.
+
+Equivalent tex renderings would be:
+\begin{enumerate}
+\item shell with redirect to capture buffer
+\item (unneeded) test tex var and shell with redirect to capture buffer
+\item include of named capture buffer.
+\item (unneeded) include of named capture buffer.
+\item include of named sidl file.
+\item shell echo + shell splice
+\item shell extract + include.
+\item shell echo + shell splice
+\end{enumerate}
+But we do not need the modal versions because we can shell script
+appropriately disjoint project trees from within tex.
+
+\section{Usage}
+\label{sec:usage}
+\subsection{Shell with capture}
+\label{sec:shell}
+This is done with the bShell/eShell markup.
+\paragraph{\texttt{Bash} script example}
+For an example have the tutorial user do something.
+
+% This is what we tell the user
+\usershell{ls}
+
+We can markup what the user is supposed to do any way we want;
+it isn't directly executed. The bShell code is. This
+lets us tell the user to do one thing but have the automation
+do a slightly different invocation to get the equivalent.
+This may result in a trivial amount of duplication of tex
+input being required for those cases where what the user does
+is identical to the shell-script-automation.
+%% using the tobiShellFileName directive.
+We can control the shell temporary filename for debugging purposes.
+This results in:
+
+\def\tobiShellFileName{tmp/first.sh}
+\begin{latexonly}
+\bShell 
+ls > $TMPDIR/ls.output
+db-style-sidl-input $TMPDIR/ls.output $GENDIR/ls.output.tex
+\eShell
+\end{latexonly}
+
+{\input{gen/ls.output.tex}}
+
+
+%% return the scratch file to the default name.
+\def\tobiShellFileName{tmp/shEsc.tmp}
+
+
+If something goes wrong (e.g. you didn't issue the
+\texttt{-shell-escape} command line option) \LaTeX{} will complain
+about the missing input file \texttt{gen/ls.output.tex} unless it
+happens to be laying about from the last processing.
+This is fine if you take it as an error message. 
+
+Note the shell script executed depends on variables GENDIR and TMPDIR
+assumed to be set in the environment or by the makefile. This is a
+matter of taste, but is handy for keeping the tex source directory
+cleaner.
+
+\subsection{Conditionally regenerated (typically by language) text}
+\label{sec:conditional}
+
+The overall assumption is that the same latex build is invoked once
+to make a complete regeneration of all included files. 
+Unlike the docbook/ruby version of this process, tex+sh gives us enough
+power to do it all in one pass.
+Thus, to produce a final document takes 3 passes:
+one to do all the input generation, one to build the table
+of contents and so forth, and one to generate html. None of the
+shell scripting is invoked during the html or TOC/indexing generation.
+All this is done in one make invocation.
+
+Just so this section has an example anyway, if you use some other
+conditional bShell based on Victor's comment package, you may want to 
+include checking for its output.
+
+\usershell{pwd}
+
+\begin{latexonly}
+\bShell 
+pwd >$GENDIR/pwd.cxx.output
+\eShell 
+\end{latexonly}
+The response to pwd is:
+
+%% IfFileExists works differently in latex2html than in
+%% latex/pdf mode. In pdf, error red text is embedded.
+%% In html mode, a missing file is an error.
+\IfFileExists{gen/pwd.cxx.output}{\input{gen/pwd.cxx.output}}{
+{\color{red} File \texttt{gen/pwd.cxx.output} has
+  not been generated. 
+}
+}
+
+If the preceding is not a directory name, it's an error message in a pdf
+and the html generator will bomb.
+
+\subsection{Inserting sidl files or output from shell commands}
+\label{sec:inserting}
+
+In some cases this is handled with plain tex include directives.
+When necessary, a filter can be run over the input using bShell to
+attach verbatim tags and style the user input lines (style-sidl-input.sh).
+If error checking is desired, IfFileExists can be
+used as demonstrated at the end of \ref{sec:conditional}
+bocca is invoked to find the sidl filename.
+
+\subsection{SIDL file splicing}
+\label{sec:sidlsplice}
+
+We want to splice into named bocca splicer block, given the full sidl symbol.
+Run under the make environment, TMPDIR, GENDIR and DOCDIR
+are defined.  DOCDIR is the full path of the Makefile location.
+All scratch build should happen under scratch/ within DOCDIR.
+If operations would conflict based on language, they should be
+performed in separate subdirectories of scratch.
+bocca's bin/ and DOCDIR/bin will be first in the path.
+
+\begin{latexonly}
+\def\tobiShellFileName{tmp/port.sh}
+% Create project & port
+% Most of this block is invariant with HOG example except the bShell line.
+\bShell[env LANG=cxx PROJECT=demo SYMBOL=FunctionPort bash]
+cd scratch/$LANG
+bocca create project $PROJECT
+cd $PROJECT
+bocca create port $SYMBOL
+file=`db-symbol-to-sidl $SYMBOL`
+db-style-sidl-input $file $GENDIR/raw-$PROJECT.$SYMBOL.sidl.tex
+\eShell
+\end{latexonly}
+
+The original sidl file looks like:
+\input{gen/raw-demo.FunctionPort.sidl.tex}
+
+\begin{latexonly}
+\def\tobiShellFileName{tmp/splice-port.sh}
+% Splice the port
+% Most of this block is invariant with HOG example except the bShell line and user input.
+\bShell[env LANG=cxx PROJECT=demo SYMBOL=FunctionPort bash]
+cd scratch/$LANG/$PROJECT
+file=`db-symbol-to-sidl $SYMBOL`
+# put splice in file. note //tex lines disappear in the styling and destyling.
+cat << EOF > $TMPDIR/$PROJECT.$SYMBOL.inp
+        // DO-NOT-DELETE bocca.splicer.begin($PROJECT.$SYMBOL.methods)
+//texbegin
+        void   init(in array<double,1> params);
+        double evaluate(in double x);
+//texend
+        // DO-NOT-DELETE bocca.splicer.end($PROJECT.$SYMBOL.methods)
+EOF
+bocca-merge \
+	--from=$TMPDIR/$PROJECT.$SYMBOL.inp \
+	--to=$file \
+	-A "DO-NOT-DELETE bocca.splicer" -B "DO-NOT-DELETE bocca.splicer" -W
+db-style-sidl-input $file $GENDIR/spliced-$PROJECT.$SYMBOL.sidl.tex
+db-destyle-sidl-input $file
+\eShell
+\end{latexonly}
+
+We use \texttt{bocca edit FunctionPort} to define the methods up by adding the highlighted lines:
+\input{gen/spliced-demo.FunctionPort.sidl.tex}
+The highlighted lines are marked by directives \texttt{//texbegin, //texend} in the splice
+supplied from the tex file. These are styled to color tex/html markup when the
+resulting file is prepared for tex input and are removed (destyled) from the source files
+before any build or bocca operations can be applied.
+
+\begin{latexonly}
+% The bocca ansi tty color build output feature doesn't render properly in tex or html.
+\bShell[env USE_COLORS=0 bash]
+cd $DOCDIR/scratch/cxx/demo
+bocca edit --touch FunctionPort > $TMPDIR/edit-demo.FunctionPort.log
+db-style-sidl-input  $TMPDIR/edit-demo.FunctionPort.log $GENDIR/edit-demo.FunctionPort.log.tex
+\eShell
+\end{latexonly}
+
+The above was be scripted with bShell and bocca-merge.
+Here's the build output if user edited with bocca edit:
+
+\input{gen/edit-demo.FunctionPort.log.tex}
+
+\subsection{Methods extracted from Impls}
+\label{sec:readmethod}
+The tasks to be done here are turn a sidl name into the full path to the matching impl file,
+Extract the method with bocca-extract,
+Include the result.
+This can be done with bShell, bocca-extract, and include, as seen below.
+\begin{latexonly}
+\bShell[env LANG=cxx PROJECT=demo SYMBOL=Driver bash]
+cd scratch/$LANG/$PROJECT
+bocca create component $SYMBOL
+file=`db-symbol-to-impl Driver code`
+bocca-extract -m setServices -M $file
+db-style-sidl-input $PROJECT.$SYMBOL.setServices.hxx.block $GENDIR/$PROJECT.$SYMBOL.setServices.hxx.tex
+\eShell
+\end{latexonly}
+
+\input{gen/demo.Driver.setServices.hxx.tex}
+
+\subsection{Writing methods to Impls}
+\label{sec:writemethod}
+Next we need to replace the default exception impl of a component with some code.
+First we create an implementation of function port and show the evaluate method from
+it.
+\begin{latexonly}
+% create component and splice a method
+\def\tobiShellFileName{tmp/splice-impl.sh}
+%splice the port
+\bShell[env LANG=cxx PROJECT=demo SYMBOL=Function FUNC=evaluate bash]
+cd scratch/$LANG/$PROJECT
+bocca create component -l$LANG Function --provides=FunctionPort
+file=`db-symbol-to-impl Function code`
+bocca-extract -m $FUNC -M $file
+db-style-sidl-input $PROJECT.$SYMBOL.$FUNC.hxx.block $GENDIR/raw-$PROJECT.$SYMBOL.$FUNC.hxx.tex
+cat << EOF > $TMPDIR/$PROJECT.$SYMBOL.$FUNC.inp
+  // DO-NOT-DELETE splicer.begin($PROJECT.$SYMBOL.$FUNC)
+//texbegin
+  return 4.0/(1+x*x);
+//texend
+  // DO-NOT-DELETE splicer.end($PROJECT.$SYMBOL.$FUNC)
+EOF
+bocca-merge \
+	--from=$TMPDIR/$PROJECT.$SYMBOL.$FUNC.inp \
+	--to=$file \
+	-A "DO-NOT-DELETE splicer" -B "DO-NOT-DELETE splicer" -W
+bocca-extract -m $FUNC -M $file
+db-style-sidl-input $PROJECT.$SYMBOL.$FUNC.hxx.block $GENDIR/spliced-$PROJECT.$SYMBOL.$FUNC.hxx.tex
+db-destyle-sidl-input $file
+\eShell
+\end{latexonly}
+
+\input{gen/raw-demo.Function.evaluate.hxx.tex}
+
+And the the user bocca edits it to match:
+\input{gen/spliced-demo.Function.evaluate.hxx.tex}
+
+We can show the output as we did at the end of \ref{sec:sidlsplice}.
+
+\subsection{Styling make output}
+\label{sec:makeoutput}
+Here's a prettified example of make output.
+\begin{latexonly}
+\def\tobiShellFileName{tmp/shEsc.tmp}
+\bShell[env LANG=cxx PROJECT=demo bash]
+cd scratch/$LANG/$PROJECT
+./configure && make USE_COLORS=0 > $TMPDIR/build.log 2>&1
+db-style-build-output $TMPDIR/build.log $GENDIR/build.log.tex
+\eShell
+\end{latexonly}
+
+\input{gen/build.log.tex}
+
+\subsection{Running other shells}
+\label{sec:othershell}
+Other commands than the \texttt{bash} shell can be used. See tobiShell.tex
+for more examples with gnuplot.
+
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% LaTeX-command-style: (("." "latex --shell-escape"))
+%%% TeX-master: t
+%%% End: 

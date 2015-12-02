@@ -1,0 +1,34 @@
+// must be compiled with
+// a) c++ client of the component
+// b) the component and port libraries.
+// c) compiler flags:
+// -D_HEADER=\"mypkg_mycomp.hxx\"
+// -D_CXXNAME=mypkg::mycomp
+// -D_SIDLNAME=\"mypkg.mycomp\"
+// or
+// run this thing through a substituter on the _ vars.
+
+#include _HEADER
+
+static void test()
+{
+	gov::cca::Component babelCmpt;
+	_CXXNAME bc = _CXXNAME::_create();
+	if ( bc._is_nil() ) {
+		std::cout << ":-( Could not create" << _SIDLNAME << std::endl;
+		return 1;
+	}
+	babelCmpt = ::babel_cast<gov::cca::Component> (bc); 
+
+	if ( babelCmpt._is_nil() ) {
+		std::cout << ":-( Could not cast to gov.cca.Component, are you sure your "
+		"component subclasses gov.cca.Component?\n" << std::endl;
+		return 2;
+	}
+	return 0;
+}
+
+void main(int argc, char **argv)
+{
+	return test();
+}

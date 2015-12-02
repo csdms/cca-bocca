@@ -1,0 +1,14 @@
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.begin(n1.s1) */
+	-1
+	-2
+	-3
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.end(n1.s1) */
+
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.begin(n1.s2) */
+	c
+	d
+  /* DO-NOT-REWRITE-MACHINE-GENERATED inner.end(n1.s2) */
+
+  /* DO-NOT-REWRITE-MACHINE-GENERATED other.end(n1.s3) */
+	x
+  /* DO-NOT-REWRITE-MACHINE-GENERATED other.end(n1.s3) */

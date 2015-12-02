@@ -1,0 +1,2014 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+	<META HTTP-EQUIV="CONTENT-TYPE" CONTENT="text/html; charset=utf-8">
+	<TITLE>Bocca Code Release Checklist</TITLE>
+	<META NAME="GENERATOR" CONTENT="OpenOffice.org 2.0  (Linux)">
+	<META NAME="CREATED" CONTENT="20071101;15554100">
+	<META NAME="CHANGEDBY" CONTENT="Ben Allan">
+	<META NAME="CHANGED" CONTENT="20071101;16335300">
+</HEAD>
+<BODY LANG="en-US" BGCOLOR="#add8e6" DIR="LTR">
+<H1 ALIGN=CENTER>Bocca Code Release Checklist</H1>
+<P ALIGN=CENTER>&nbsp; 
+</P>
+<P ALIGN=CENTER><BR><BR>
+</P>
+<CENTER>
+	<TABLE BORDER=0 CELLPADDING=2 CELLSPACING=2>
+		<TR>
+			<TD>
+				<P>Release Version</P>
+			</TD>
+			<TD>
+				<P ALIGN=CENTER STYLE="margin-bottom: 0in">0.4.2</P>
+				<HR>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>Release Manager</P>
+			</TD>
+			<TD WIDTH=100>
+				<P ALIGN=CENTER STYLE="margin-bottom: 0in">Anonymous</P>
+				<HR>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>Release Date</P>
+			</TD>
+			<TD>
+				<P ALIGN=CENTER>November 2007</P>
+			</TD>
+		</TR>
+	</TABLE>
+</CENTER>
+<HR>
+<H2>Preliminaries</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in"><I>The onset of a major or
+minor release should come as no surprise to all the developers
+involved in the project. It is vital at a release that the developers
+all agree what is to be included in the release, what is to be
+retired (or deprecated) in this release, and what is to be added in
+some future release. Normally this process should be handled as a
+release issue in the tracker.</I> 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=20*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=234*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Draw up an announcement text file.</B> <BR><I>This file
+				should be called </I><TT>ANNOUNCE</TT> <I>and put in the root
+				directory of the source code.</I> <I>This file should list all
+				the new or improved features of the software since its last major
+				and/or minor release. This file also forms an internal contract
+				that all developers commit to fulfilling before the code freeze.
+				For major/minor releases, pointers to information about porting
+				bocca projects based on the most recent  release must be
+				included. Patch releases by definition require no porting. &nbsp;</I></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP>
+				<P><FONT SIZE=1 STYLE="font-size: 2pt">date</FONT></P>
+			</TD>
+			<TD WIDTH=8%>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Draw up matching RETIRED and NOT_YET files.</B> <BR><I>These
+				are for the developer's benefit only and should <B>not</B> be
+				included in the release. Put these files also in the root
+				directory of the software, but <B>do not</B> make any mention of
+				them elsewhere, especially </I><TT>Makefile.am</TT>.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>n/a</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Given announcement file, have developers commit to a code
+				freeze date/time.</B></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><TT><B>configure.ac, scripts/bocca</B></TT> <BR><I>Change
+				__version__ in python and  AC_INIT in configure.ac files. Confirm
+				that the version number in the macro matches with the expected
+				release number.&nbsp;&nbsp; Be sure to perform autoconf </I>&amp;
+				configure <I>as well.</I></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><TT><B>additional file changes for release</B></TT><BR><I>Confirm
+				that the version number matches with the expected release number.</I></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+	<HR>
+</DL>
+<H2>File Verification</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in"><I>The following files should
+be verified as up-to-date in the root directory. Furthermore, they
+should all be listed in the EXTRA_DIST macro in the Makefile.am file.</I>
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=20*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=230*>
+			<COL WIDTH=4*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><TT><B>README</B></TT></P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% HEIGHT=7 VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><TT><B>CHANGES</B></TT></P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><TT><B>BUGS</B></TT></P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90%>
+				<P><TT><B>ANNOUNCE</B></TT></P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% HEIGHT=6617 VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=90% HEIGHT=6617>
+				<P><TT><B>LICENSE</B></TT></P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% HEIGHT=2201 VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% HEIGHT=2201 VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+	<HR>
+</DL>
+<H2>Code Freeze</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in"><I>More appropriately called a
+&quot;feature freeze&quot;, the purpose is to enter a special mode of
+code development where no new features are added to the code. In
+fact, once this phase is entered, no edits to any file should be made
+except to fix bugs -- whether it be in source code, supporting files,
+or documentation.</I> 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=20*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=234*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Verify check-in of all scheduled code deliverables.</B></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Generate new documentation as needed from tex sources.</B></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Copy all relevant HTML, Postscript and PDF files to source
+				directory (bocca/doc/manuals/).</B> <BR><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/8/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Email all developers that the code is now officially
+				&quot;frozen&quot;.</B></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/9/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><B>Verify that no reference to the previous version of the
+				code exists where it shouldn't.</B> <BR>Use&nbsp; <BR>&nbsp; <TT>find
+				. \( -name .svn -prune \) -o \( -type f -exec grep -l &quot;0\.4\.0&quot;
+				{} \; -print \)<BR></TT><BR><I>or</I> <BR>&nbsp;&nbsp;&nbsp; <TT>find
+				. -type f -exec grep -l &quot;x\.x\.(x-2)&quot; {} \;</TT>
+				<BR><I>depending on whether the prior version was one or two
+				minor release numbers less.</I> <BR><I><B>Remember:&nbsp;</B>
+				Version numbers are in the comment blocks of Impls... therefore
+				at least one non-VPATH &quot;make check&quot; is necessary.</I>&nbsp;&nbsp;
+				Also, the file CHANGES is expected to have the previous version
+				number in it.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/9/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=91%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/9/2006</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+	<HR>
+</DL>
+<H2>Feature Verification</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in"><I>Any feature or
+functionality mentioned in the ANNOUNCE file should be verified.
+Ideally, this verification can be done by confirmation of a test or
+suite of tests executed by the traditional 'gmake</I><TT> check'</TT>
+<I>command.</I> 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=26*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=228*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=11% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=89%>
+				<P><B>Confirm existence and successful execution of a test script
+				for each new feature.</B> <I>(Failure to confirm is considered a
+				bug worthy of editing or adding to the frozen code)</I></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=10%>
+				<P>Skipped</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=11% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=11% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=89%>
+				<P><B>Confirm supporting documentation accurately represents the
+				feature.</B> <I>(Failure to confirm is considered a bug and
+				worthy of editing the frozen documentation.)</I></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=10%>
+				<P>Skipped</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=11% VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+	<HR>
+</DL>
+<H2>Portability Testing</H2>
+<BLOCKQUOTE><I>Testing should, in fact, be done in concert with code
+development. Any code that breaks at this stage of the release cycle,
+on the primary development platform (linux gcc4, osx gcc4) should be
+a big surprise and possibly trigger a re-evaluation of the entire
+release cycle. Nonetheless, every developer cannot be expected to run
+extensive testing on all supported platforms daily, so portability
+testing is required.</I> 
+</BLOCKQUOTE>
+<BLOCKQUOTE><I>Any failure of any test on any platform must be
+resolved by either (1) fixing the bug, or (2) changing the test to
+&quot;expected failure&quot; (</I><TT>XFAIL</TT><I>). The latter must
+be agreed upon by the development team and an entry must be made in
+the </I><TT>BUGS</TT> <I>file in the root directory and Bugzilla.</I></BLOCKQUOTE>
+<BLOCKQUOTE><I>NOTE: Whenever a bug is found and fixed, all previous
+tests are invalid and must be rerun.</I></BLOCKQUOTE>
+<BLOCKQUOTE>The process involves performing &quot;make distcheck&quot;,
+at least on the official development platform.&nbsp; An alternative
+for other platforms is to simply perform &quot;make check&quot; with
+the distribution tarball created from the official development
+platform.&nbsp; (Note the latter approach was not employed for this
+release.) 
+</BLOCKQUOTE>
+<BLOCKQUOTE><B>NOTE:&nbsp; The flags listed under &quot;Config&quot;
+below represent general settings but do not necessarily reflect all
+compiler flags needed for each of the three compilers.&nbsp; For the
+actual settings, check the appropriate profile file found in the
+regression/cronjobs directory.</B> <BR>&nbsp; <BR>&nbsp; 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=4 CELLPADDING=2 CELLSPACING=2>
+		<TR>
+			<TH ROWSPAN=2>
+				<P>Machine</P>
+			</TH>
+			<TH ROWSPAN=2>
+				<P>Compiler</P>
+			</TH>
+			<TH ROWSPAN=2>
+				<P>Config</P>
+			</TH>
+			<TH ROWSPAN=2>
+				<P>Packages</P>
+			</TH>
+			<TH COLSPAN=4>
+				<P>Regression Test Parts</P>
+			</TH>
+			<TH ROWSPAN=2>
+				<P>Date</P>
+			</TH>
+		</TR>
+		<TR>
+			<TD>
+				<P>PASS</P>
+			</TD>
+			<TD>
+				<P>XFAIL</P>
+			</TD>
+			<TD>
+				<P>FAIL</P>
+			</TD>
+			<TD>
+				<P>BROKEN</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=5>
+				<P>qc.ca.sandia.gov 
+				</P>
+			</TD>
+			<TD ROWSPAN=2>
+				<P><B>py2.5/babel1.0.6</B> 
+				</P>
+			</TD>
+			<TD>
+				<P><BR><BR>
+				</P>
+				<P><B>?<!--Config--></B> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>comment</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>?<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>py2.5/babel1.0.8</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P>18561</P>
+			</TD>
+			<TD>
+				<P>17</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>7/21/2006 (distcheck passed)</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>?py2.3/babel 1.0.6</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P>18561</P>
+			</TD>
+			<TD>
+				<P>17</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>7/20/2006 (opt version)</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>?</P>
+			</TD>
+			<TD>
+				<P>-g -O2</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P>18561</P>
+			</TD>
+			<TD>
+				<P>17</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>0</P>
+			</TD>
+			<TD>
+				<P>7/21/2006</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=6>
+				<P>osx/norris 
+				</P>
+			</TD>
+			<TD ROWSPAN=2>
+				<P><B>?</B> 
+				</P>
+			</TD>
+			<TD>
+				<P>?<!--Config--><!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P>18511<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>17 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL-->0 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken-->10<!--Date--> 
+				</P>
+			</TD>
+			<TD>
+				<P>7/21/2006 (broken tests fixed and verified)</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P><B>?</B> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2>
+				<P>? 
+				</P>
+			</TD>
+			<TD>
+				<P>-?<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-?<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--><!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P><BR>
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>Failed**<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2>
+				<P>?</P>
+			</TD>
+			<TD>
+				<P><B>-?<!--Config--></B> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>Failed**<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-?<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=6>
+				<P>linux/wael 
+				</P>
+			</TD>
+			<TD ROWSPAN=2>
+				<P>gcc/g++/g77<!--Compiler--> 
+				</P>
+			</TD>
+			<TD>
+				<P>-g<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-O<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2>
+				<P>icc/icpc/f77/ifort<!--Compiler--> 
+				</P>
+			</TD>
+			<TD>
+				<P>-g<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--><!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>18566<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>12<!--Tests=FAIL--></P>
+			</TD>
+			<TD>
+				<P>0<!--Tests=Broken--></P>
+			</TD>
+			<TD>
+				<P>0<!--Date--> 
+				</P>
+			</TD>
+			<TD>
+				<P>7/21/2006</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-O<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2>
+				<P>kcc/KCC/kf77<!--Compiler--> 
+				</P>
+			</TD>
+			<TD>
+				<P>-g<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-O<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=4>
+				<P>osx/rob</P>
+			</TD>
+			<TD ROWSPAN=2>
+				<P>py=? 
+				</P>
+			</TD>
+			<TD>
+				<P>-g<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-O<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2>
+				<P>newxlc/newxlC/newxlf77/newxlf90<!--Compiler--> 
+				</P>
+			</TD>
+			<TD>
+				<P>-g<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=XFAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Date--> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD>
+				<P>-O<!--Config--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Packages--><!--Tests=PASS--> 
+				</P>
+			</TD>
+			<TD>
+				<P>12622 
+				</P>
+			</TD>
+			<TD>
+				<P>4</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=FAIL--> 
+				</P>
+			</TD>
+			<TD>
+				<P>.<!--Tests=Broken--> 24</P>
+			</TD>
+			<TD>
+				<P>comment 
+				</P>
+			</TD>
+		</TR>
+	</TABLE>
+</DL>
+<BLOCKQUOTE>Notes here..</BLOCKQUOTE>
+<BLOCKQUOTE>more notes here 
+</BLOCKQUOTE>
+<BLOCKQUOTE>&lt;&gt;* footnote<BR>** footnote<BR>*** footnote<BR>&nbsp;
+<BR>&nbsp; 
+</BLOCKQUOTE>
+<H2>Release Procedures</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in">After code has passed all the
+tests, all the supporting files are updated, and all the
+documentation has been updated, it is time to actually create a
+release.&nbsp; Be sure to use the regular options (i.e., do not
+utilize the optimization options). 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=649 BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=0>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=43>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=0>
+			<COL WIDTH=583>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=49 VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=583>
+				<P><B>Perform a final check for memory leaks</B>  (once it's
+				working)<BR><TT>&nbsp;&nbsp; ./configure ; make ; make check</TT>
+				; make memcheck</P>
+				<P><STRONG>result summary.</STRONG> Here are the results.</P>
+				<PRE>=result details.</PRE>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=0 VALIGN=TOP></TD>
+			<TD WIDTH=43>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0 VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=49 VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+</DL>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=20*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=6*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=228*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=89%>
+				<P><B>Perform a final check on at least one  development
+				platform.</B> <BR>&nbsp;&nbsp;&nbsp; <TT>./configure; make ; make
+				check</TT> <BR><BR>&nbsp;</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD COLSPAN=2 WIDTH=10%>
+				<P>date</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=89%>
+				<P><B>Create SVN version and branch for major release.</B> <BR>&nbsp;&nbsp;
+				<FONT FACE="monospace">svn copy
+				svn+ssh://cca-forum.org/home/svn/bocca/trunk
+				svn+ssh://cca-forum.org/home/svn/bocca/branches/release-0.4.x-branch
+				-m “major branch 0.4”</FONT></P>
+				<P><FONT FACE="monospace">Create the tag for diff purposes. fixes
+				happen on the x branch. For patch releases, just do the tag copy
+				below.</FONT></P>
+				<P><FONT FACE="monospace">svn copy
+				svn+ssh://cca-forum.org/home/svn/bocca/branches/release-0.4.x-branch
+				svn+ssh://cca-forum.org/home/svn/bocca/tags/release-0.4.2 -m
+				&quot;Create tag for bocca 0.4.2.&quot;<BR><BR><BR>Committed
+				revision 5747.</FONT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>11/9/2006</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=3% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP>
+				<P ALIGN=CENTER><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=89%>
+				<P>For major stable releases, immediately bump the version tag in
+				configure and scripts/bocca on up to the next unstable number. No
+				feature development happens on the stable branches ever.</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>date</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=3% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=4 WIDTH=11% VALIGN=TOP></TD>
+		</TR>
+	</TABLE>
+	<HR>
+</DL>
+<H2>Deployment</H2>
+<BLOCKQUOTE STYLE="margin-bottom: 0in"><I>After the tarball has been
+created, it needs to be advertised and deployed appropriately (and
+extensively).</I> <BR>&nbsp; 
+</BLOCKQUOTE>
+<P ALIGN=CENTER STYLE="margin-bottom: 0in">&nbsp; 
+</P>
+<DL>
+	<DD>
+	<TABLE WIDTH=80% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=GROUPS>
+		<COLGROUP>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=20*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=1*>
+			<COL WIDTH=2*>
+			<COL WIDTH=3*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=22*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=6*>
+		</COLGROUP>
+		<COLGROUP>
+			<COL WIDTH=66*>
+			<COL WIDTH=112*>
+			<COL WIDTH=22*>
+			<COL WIDTH=2*>
+		</COLGROUP>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=3 COLSPAN=8 WIDTH=91%>
+				<P><B>Add the new release number to the Bugzilla Tracking system </B>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1% VALIGN=TOP></TD>
+			<TD WIDTH=8%>
+				<P>1/30/2004</P>
+			</TD>
+			<TD WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD ROWSPAN=2 COLSPAN=8 WIDTH=91%>
+				<P><B>Update Project wiki page </B> <BR>&nbsp; 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=3 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=3 WIDTH=8%>
+				<P>8/18/2004</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=0% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=3 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=2 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=2 WIDTH=9% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=18*>
+					<COL WIDTH=230*>
+					<COL WIDTH=8*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P><BR>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=7% VALIGN=TOP></TD>
+						<TD WIDTH=90%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD ROWSPAN=2 COLSPAN=4 WIDTH=81%>
+				<P>&nbsp;&nbsp;&nbsp; copy file to cca-forum.org/download/bocca</P>
+			</TD>
+			<TD ROWSPAN=3 WIDTH=1% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=3 COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD WIDTH=9% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=18*>
+					<COL WIDTH=230*>
+					<COL WIDTH=8*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=7% VALIGN=TOP></TD>
+						<TD WIDTH=90%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=4 WIDTH=81%>
+				<P>&nbsp;&nbsp;&nbsp; Confirm pages in place</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=8 WIDTH=91%></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9%>
+				<P>&nbsp;</P>
+			</TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P><B>Install at the following sites</B> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=2 WIDTH=8%>
+				<P>3/xx/2003</P>
+			</TD>
+			<TD ROWSPAN=2 WIDTH=0% VALIGN=TOP></TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=3 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=2 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=2 COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=178*>
+					<COL WIDTH=64*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=70%>
+							<P>4/7/2003</P>
+						</TD>
+						<TD WIDTH=25% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD ROWSPAN=2 WIDTH=26%>
+				<P>?</P>
+			</TD>
+			<TD ROWSPAN=3 COLSPAN=3 WIDTH=53% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=3 COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=236*>
+					<COL WIDTH=6*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=92%>
+							<P>Skipped</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD WIDTH=26%>
+				<P>?</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=8 WIDTH=91%></TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P><BR>
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=3 WIDTH=9% VALIGN=TOP>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P><B>Email the ANNOUNCE file to the following reflectors</B> 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=2 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=2 WIDTH=8%>
+				<P>1/30/2004</P>
+			</TD>
+			<TD ROWSPAN=2 WIDTH=0% VALIGN=TOP></TD>
+			<TD COLSPAN=8 WIDTH=91%>
+				<P ALIGN=CENTER>&nbsp; 
+				</P>
+			</TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=8 WIDTH=1% VALIGN=TOP></TD>
+			<TD ROWSPAN=2 WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD ROWSPAN=2 COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=178*>
+					<COL WIDTH=64*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=70%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=25% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD ROWSPAN=2 COLSPAN=2 WIDTH=69%>
+				<P>&nbsp;&nbsp;&nbsp; cca-forum@cca-forum.org</P>
+			</TD>
+			<TD ROWSPAN=8 COLSPAN=2 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD ROWSPAN=8 COLSPAN=3 WIDTH=9% VALIGN=TOP></TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=178*>
+					<COL WIDTH=64*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=70%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=25% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P><TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=236*>
+					<COL WIDTH=6*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=92%>
+							<P>Skipped</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P>&nbsp;&nbsp;&nbsp;<TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=178*>
+					<COL WIDTH=64*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=70%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=25% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P><TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=178*>
+					<COL WIDTH=64*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=70%>
+							<P>8/18/2004</P>
+						</TD>
+						<TD WIDTH=25% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P><TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=236*>
+					<COL WIDTH=6*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=92%>
+							<P>Skipped</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P><TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD WIDTH=1%>
+				<P><BR>
+				</P>
+			</TD>
+			<TD COLSPAN=2 WIDTH=11% VALIGN=TOP>
+				<TABLE WIDTH=100% BORDER=1 CELLPADDING=2 CELLSPACING=3 FRAME=VOID RULES=COLS>
+					<COL WIDTH=14*>
+					<COL WIDTH=236*>
+					<COL WIDTH=6*>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP>
+							<P ALIGN=CENTER>&nbsp; 
+							</P>
+						</TD>
+					</TR>
+					<TR>
+						<TD WIDTH=5% VALIGN=TOP></TD>
+						<TD WIDTH=92%>
+							<P>Skipped</P>
+						</TD>
+						<TD WIDTH=3% VALIGN=TOP></TD>
+					</TR>
+					<TR>
+						<TD COLSPAN=3 WIDTH=100% VALIGN=TOP></TD>
+					</TR>
+				</TABLE>
+			</TD>
+			<TD COLSPAN=2 WIDTH=69%>
+				<P><TT>?</TT></P>
+			</TD>
+		</TR>
+		<TR>
+			<TD COLSPAN=8 WIDTH=91%></TD>
+		</TR>
+	</TABLE>
+</DL>
+<P><BR><BR>
+</P>
+</BODY>
+</HTML>

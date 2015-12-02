@@ -1,0 +1,22 @@
+#!ccaffeine bootstrap file. 
+# ------- don't change anything ABOVE this line.-------------
+path set /home/baallan/cca/build/bocca/trunk/test/cca/bp/components/lib
+
+#bpF.testX#
+
+repository get-global bpF.testX
+instantiate bpF.testX bpF_testX
+display component bpF_testX
+# dump starting values
+config bpF_testX tuner ALL
+
+# wire for selftest
+connect bpF_testX tunertest bpF_testX tuner
+go bpF_testX go
+display component bpF_testX
+# dump final values
+config bpF_testX tuner ALL
+# undo app setup
+disconnect bpF_testX tunertest bpF_testX tuner
+remove bpF_testX
+quit

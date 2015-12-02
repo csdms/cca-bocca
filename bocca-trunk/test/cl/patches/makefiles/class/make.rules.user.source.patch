@@ -1,0 +1,43 @@
+13,15c13,14
+< pre-gencode-user:
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> pre-gencode-user: source_rule shared_rule
+> 	@echo "Class build hook $@: source"
+20,21c19
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"	
+---
+> 	@echo "Class build hook $@: source"
+26,27c24
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: source"
+31,32c28
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: source"
+36,37c32
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: source"
+41,42c36
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: source"
+46,47c40,46
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Class build hook $@: source"
+> 
+> source_rule:
+> 	@echo "Inside source rule: $(CLASS_SOURCE_VAR)"
+> 
+> shared_rule:
+> 	@echo "Inside shared rule (source): $(CLASS_SHARED_VAR)"

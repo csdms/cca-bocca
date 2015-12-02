@@ -1,0 +1,29 @@
+package parallel version 1.0 {
+
+  /** An interface for components which wish to have a shared
+      communicator set on them.
+   */
+  interface MPICommUser extends gov.cca.Port
+  {
+    /** Accepts a communicator. The ownership
+        of the communicator remains with the 
+        caller and the caller agrees that it
+        will not be destroyed while in use by
+        the receiver. N.B. This is not the only
+        way of handling ownership of communicators,
+        and probably not even a very good one.
+
+	@param fortranComm the communicator in SIDL form.
+	C/C++ and other components will have to use the
+	appropriate MPI_Comm_c2f/f2c operations to call
+	this function.
+	Fortran components may have to convert the
+	INTEGER*8 to INTEGER if these are of different sizes,
+	as the MPI library will expect to be passed an
+	INTEGER reference in MPI calls.
+
+    */
+    void setComm(in long fortranComm);
+  }
+
+}

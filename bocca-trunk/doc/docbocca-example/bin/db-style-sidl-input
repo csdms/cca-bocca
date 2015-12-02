@@ -1,0 +1,70 @@
+#!/bin/sh
+# script to replace ^..texbegin, ^..texend lines with
+# pre and post tex markup blocks. Marks rest of file verbatim.
+# $1 input file.
+# $2 output file.
+# Note that there's no way to suppress the paragraph break in 
+# tex or pre tag break in html renderers without
+# disabling some arbitrary valid input character to verbatim.
+# There will always be a lines worth of whitespace (at least)
+# around texbegin/texend blocks. \verb cannot help you.
+ 
+if test $# -ne 2; then
+	echo "Incorrect number of arguments"
+	echo "$"
+	exit 1
+fi
+if ! test -f $1; then
+	echo "Input file $1 does not exist"
+	exit 1
+fi
+if test -f $2; then
+	if ! test -w $2; then 
+		echo "$0: cannot write to $2"
+		exit 1
+	fi
+	echo "Overwriting $2"
+else
+	dir=`dirname $2`
+	if ! test -d $dir; then
+		echo "$0: output directory $dir does not exist"
+		exit 1
+	else
+		if ! test -w $dir; then
+			echo "$0: output directory $dir not writable"
+			exit 1
+		fi
+	fi
+fi
+cat $1 | awk '
+BEGIN {
+	print "\\smaller"
+	print "\\begin{verbatim}"
+}
+NF != 1 {
+	print
+}
+NF == 1 {
+  if ( $1 !~ /^..tex/ ) {
+    print
+  } else {
+    if ( $0 ~ /^..texbegin/ ) {
+      print "\\end{verbatim}"
+      print "\\color{green}"
+      print "\\begin{rawhtml} <font color="green" > \\end{rawhtml}"
+      print "\\begin{verbatim}"
+    }
+    if ( $0 ~ /^..texend/ ) {
+      print "\\end{verbatim}"
+      print "\\color{black}" 
+      print "\\begin{rawhtml} </font> \\end{rawhtml}"
+      print "\\begin{verbatim}"
+    }
+  }
+}
+END {
+	print "\\end{verbatim}"
+	print "\\larger"
+}
+' > $2
+exit 0

@@ -1,0 +1,92 @@
+package arrayop version 1.0{
+   
+ /** This port can be used to evaluate a matrix operation of the form
+   * of the form
+   *  R = Sum[i=1, N] {Alpha_i A_i v_i} + Sum[j=1, N] {Beta_j v_j}}
+   * Where: 
+   *    alpha_i, Beta_j   Double scalar
+   *    A_i               Double array of size [m, n]
+   *    v_i, v_j          Vector of size [n]
+   *    A_i  v_j          Matrix vector multiplication
+   */ 
+   interface LinearOp extends gov.cca.Port 
+   {
+    /** Initialize (or Re-Initialize) internal state in preparation
+      * for accumulation. 
+      */
+      void  init();
+      
+    /** Evaluate Acc = Acc + alpha A x,  where
+      *   Acc     The internal accumulator maintained by implementors 
+      *           of this interafce
+      * return the result  in vector y (of size m)
+      */
+      int mulMatVec (in double               alpha, 
+                     in rarray<double, 2>   A(m, n), 
+                     in rarray<double, 1>    x(n), 
+                     inout rarray<double, 1> y(m),
+                     in int                  m,
+                     in int                  n);
+                     
+    /** Evaluate Acc = Acc + beta v,  where
+      *   Acc     The internal accumulator maintained by implementors 
+      *           of this interafce
+      * return the result  in vector y (of size m)
+      */
+      int addVec ( in double            beta,
+                   in array<double, 1>  v,  
+                   out array<double, 1> r);
+                   
+    /** Get result of linear operators              
+      */
+      int getResult (inout rarray<double, 1>  r(m),
+                     in    int                  m);
+                     
+   }
+   
+ /** This port can be used to evaluate a linear matrix operation 
+   * of the form
+   *  R = Sum[i=1, N] {Alpha_i log(A_i)} + Sum[j=1, N] {Beta_j A_j .* M_j}}
+   * Where:
+   *    alpha_i, Beta_j   Double scalar
+   *    A_i, M_j          Double array of size [m, n]
+   *    log(A_i)          Elementwise log (base 10) of matrix A_i
+   *    A_j .* M_j        Elementwise multiplication of A_j and M_j
+   */
+   interface NonLinearOp extends gov.cca.Port 
+   {
+    /** Initialize (or Re-Initialize) internal state in preparation
+      * for accumulation.
+      */
+      void  init();
+      
+    /** Evaluate Acc = Acc + alpha log(A) where
+      *   log(A)  Elementwise log (base 10) of array A
+      *   Acc     The internal accumulator maintained by implementors 
+      *           of this interafce
+      * return the result  in array R
+      */
+      int logMat (in double                alpha, 
+                  in rarray<double, 2>     A(m, n), 
+                  inout rarray<double, 2>  R(m, n),
+                  in int                   m,
+                  in int                   n);
+                  
+    /** Evaluate Acc = Acc + beta A .* M, where 
+      *   .*   denotes elementwise multiplications of arrays
+      *   Acc  the internal accumulator maintained by implementors 
+      *        of this interafce
+      * return the result  in array R
+      */
+      int mulMatMat ( in double            beta,
+                      in array<double, 2>  A,  
+                      in array<double, 2>  M,  
+                      out array<double, 2> R);
+                   
+    /** Get result of nonlinear operation accumulation.
+      */
+      int getResult (inout rarray<double, 2>  R(m, n),
+                     in    int                m,
+                     in    int                n);
+   }
+}

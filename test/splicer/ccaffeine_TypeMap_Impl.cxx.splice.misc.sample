@@ -1,0 +1,59 @@
+// DO-NOT-DELETE splicer.begin(ccaffeine.TypeMap._misc)
+
+template <class Scalar > 
+sidl::array< Scalar > ccaffeine::TypeMap_impl::convertToSidlArray( ::std::vector< Scalar > & val )
+{
+  size_t len = val.size(); 
+#ifdef CCAFE_AUDIT
+  // IO_dn2("ccaffeine::TypeMap_impl::convertToSidlArray input len: %d.", len);
+#endif
+  sidl::array< Scalar > myarray = sidl::array< Scalar >::create1d( len ); 
+  size_t i=0; 
+  for( ; i < len ; i++) { 
+    /* 074 and later array api */ 
+    myarray.set( i , val[i] );
+  } 
+#ifdef CCAFE_AUDIT
+//  int slen = myarray.upper(0) - myarray.lower(0) +1;
+//  IO_dn2("ccaffeine::TypeMap_impl::convertToSidlArray output len: %d.", slen);
+#endif
+  return myarray;
+}
+
+template <class Scalar >
+::std::vector< Scalar > ccaffeine::TypeMap_impl::convertToVector( sidl::array< Scalar > & val )
+{
+  int len = (val.upper(0) - val.lower(0)) + 1; 
+#ifdef CCAFE_AUDIT
+//  IO_dn2("ccaffeine::TypeMap_impl::convertToVector input len: %d.", len);
+#endif
+  ::std::vector< Scalar > res(len);
+  int bottom = val.lower(0);
+  for(int i=0; i < len ; i++) { 
+    res[i] = ( val.get(bottom + i) );
+  }
+#ifdef CCAFE_AUDIT
+//  IO_dn2("ccaffeine::TypeMap_impl::convertToVector output len: %d.", res.size());
+#endif
+  return res;
+}
+
+::ccaffeine::TypeMap 
+ccaffeine::TypeMap_impl::babelWrap( ::ccafeopq::TypeMap_shared ctm_)
+{
+  if (!ctm_) {
+#ifdef CCAFE_AUDIT
+  IO_dn1("ccaffeine::TypeMap_impl babelWrap got null ctm_");
+#endif
+  }
+  ::ccafeopq::TypeMap_shared * tm_addr;
+  tm_addr = &ctm_;
+  void *vp;
+  vp = static_cast<void *>(tm_addr);
+
+  ::ccaffeine::TypeMap btm = ::ccaffeine::TypeMap::_create();
+  btm.initialize(vp);
+  return btm;
+}
+
+// DO-NOT-DELETE splicer.end(ccaffeine.TypeMap._misc)

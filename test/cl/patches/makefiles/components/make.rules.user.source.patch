@@ -1,0 +1,43 @@
+12,14c12,13
+< pre-build-user:
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> pre-build-user: source_rule shared_rule
+> 	@echo "Component build hook $@: source"
+19,20c18
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+24,25c22
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+29,30c26
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+34,35c30
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+39,40c34
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+44,45c38,44
+< 	$(dprint) "Build hook $@ in $(MYDIR) started"
+< 	$(dprint) "Build hook $@ in $(MYDIR) completed"
+---
+> 	@echo "Component build hook $@: source"
+> 
+> source_rule:
+> 	@echo "Inside source rule: ${SOURCE_VAR}"
+> 
+> shared_rule:
+> 	@echo "Inside shared rule (source): ${SHARED_VAR}"

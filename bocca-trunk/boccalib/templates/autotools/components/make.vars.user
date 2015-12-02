@@ -1,0 +1,34 @@
+# This file contains user-specified flags for every component.
+# These will be applied when building all component code.
+# --------------------------------------------------------------
+# Include path directives, including paths to Fortran modules
+components_INCLUDES = -I/BOCCA_COMPONENTS_MAKE_VARS_USER_SEEN_INC
+
+# Library paths and names
+# binaries
+components_LIBS = -L/BOCCA_TOP_MAKE_VARS_USER_SEEN_LIB
+# java 
+components_CLASSPATH=
+# python
+components_PYTHONPATH=
+
+# Optional additional compiler flags (Note: many compiler flags are only weakly portable)
+# Removing $(BOCCA_IO_FLAGS) from the build options will turn off all 
+# bocca-generated print statements for c, c++, and f90 preprocessor.
+# It may reduce the precision of locations reported in exception messages for c++.
+# print statements for java, f77, and python are controlled by the component private data
+# bocca_print_errs.
+# f90 preprocessor flags
+components_FPPFLAGS= 
+# f77 preprocessor flags
+components_F77PPFLAGS=
+# compiler flags
+components_CFLAGS=   
+components_CXXFLAGS= 
+components_F90FLAGS= 
+components_F77FLAGS= 
+components_JAVAFLAGS= 
+components_TESTS=
+
+# Additional phony targets defined by users (the initial targets in make.rules.user are already included)
+USER_PHONY = 

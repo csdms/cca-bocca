@@ -1,0 +1,46 @@
+See also multiuser.txt
+
+Boyana:  since bocca does not help manage the revision control   (although it could if people weren't violently opposed), files and even directories are often not added after being created
+so you may end up with a .dat file that says there is component Foo, but no Foo directory or other files
+if you use rc with bocca with multiple developers, you usually hit this problem on the first day (and over and over after that)
+and one of those people is me, and i supposedly know what should be committed, but it's easy to just forget
+esp. for python component, which bury the impls in deep subdir trees
+ 
+ Ben:  I think the most I would consider supporting is "bocca check project --vc=svn" or some such syntax that would verify all bocca-known files are under control and warn if not by generating the appropriate suggested commands. svn in particular is prone to committing more files than one might want. I'm quite certain i never want to answer a bug report: "bocca killed my repository by doing ..."
+ 
+ Boyana:  yes, well, i can safely say that bocca is better equipped to do svn additions or commits than i am; we can simply not provide a delete
+generating the command and having users do copy/paste is tedious, but if you think it's somehow different from just running it, that's pretty easy to add by extending the existing display commands
+and just yesterday, we had an example of where bocca could have actually saved something
+when another developer did svn delete by mistake
+
+ Ben:  The most i would want to agree to is svn add. in particular, machine generated CVS traffic will destroy one's access at NERSC. 50 ssh connections in under a minute is considered hostile by a lot of firewalls.
+
+ Boyana:  why would you need so many?
+ Ben:  we have to be no-naive about the commits if we do them.
+cvs mkdir is a connection.
+ Boyana:  and you can't make more than one at a time?
+sorry, haven't used cvs in a while...
+i'm in svn or mercurial all the time lately
+ Ben:  you can group things to be safe, but we have to do so. i locked my self  out of cca-forum because the lbl didn't like my find . -type d -exec CVS add {} \; once.
+ 
+ Ben:  I really like the design you have that the local symbols graph file is always sane (barring psychotic user) because errors rollback changes. what would you think of having the "external" bits all be kept in graph nodes but those nodes be stored in a BOCCA/$proj@$user@$host.dat file instead and all the main graph file has is a list of sidl names it expects to be resolved from  the @*dat files? When we go to load the graph, the check steps seem to be easy given the data organized  this way. I'm not sure enough of how the graph reconstruction works at load, though, if deserializing wouldn't fall apart because nodes must be read/written in some sequence or load order is irrelevant.
+
+ Boyana:  i like that idea
+the graph reading is very simple, load order is not that important
+
+ Ben:  that then lets us put depl file names directly in the graph and all i have to keep in the defaults file is the list of aliases for hosts and users to make sure we read the right local .dat.
+
+ Boyana:  and by depl names you mean just names, right (not paths)?
+
+ Ben:  depl full path goes in the userhost-specific .dat. a list of external sidl symbol names (only) goes in the in-project .dat.
+
+ Boyana:  what about the config-generated stuff
+that bocca needs, e.g., path to babel-config
+userhost-specific .dat?
+it would be a strange new kind of entry, or perhaps an attribute of the project vertex
+
+ Ben:  i think the config-vars stuff that's currently in defaults already has a separate file, doesn't it? if not, we can split $proj.defaults.
+
+ Boyana:  no, but it should
+it causes all kinds of trouble where it is
+ 

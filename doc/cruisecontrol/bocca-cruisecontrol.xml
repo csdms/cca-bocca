@@ -1,0 +1,26 @@
+<!-- Delegating build script, used by cruisecontrol to build MY_PROJECT_1.
+       Note that the basedir is set to the checked out project -->
+  <project name="build-bocca" default="build"
+	   basedir="checkout/bocca">
+    <target name="svnupdate">
+   	<!-- Get the latest from SVN -->
+	<!--svn update-->
+	<exec executable="svn">
+          <arg line="update --username norris --password ''"/>
+        </exec>
+    </target>
+    <target name="configure" depends="svnupdate">
+	<!-- Call the configure target -->
+	<ant antfile="build.xml" target="configure"/>
+    </target>
+    <target name="build" depends="configure,svnupdate">
+	<!-- Do 'make clean', 'make install' -->
+	<ant antfile="build.xml" target="clean"/>
+	<ant antfile="build.xml" target="make"/>
+    </target>
+    <target name="check" depends="build,configure,svnupdate">
+	<!-- Do 'make check' -->
+	<ant antfile="build.xml" target="check"/>
+	<ant antfile="build.xml" target="copywebfiles"/>
+    </target>
+  </project>

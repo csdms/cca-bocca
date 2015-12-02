@@ -1,0 +1,109 @@
+Target state:
+plugin gets (intelligently) the known external depl symbols and generates a makefile cache of needed vars
+for sidl processing, compilation (includes), and linking (libs).
+
+Current state:
+dpath records external info in External section
+Association symbols are locatable by search path if sidl path not given.
+
+Need:
+(Verify those records exist on filesystem, Verify internal consistency of those records,) are options on Index construction.
+Suggest missing records if found on filesystem,
+Generate makefile insert,
+Make to rerun the script when data changes.
+
+
+See Features section of 
+https://www.cca-forum.org/bugs/bocca
+
+me:  hi,
+busy?
+ brnorris03:  not terribly                                                                                                                                  
+ Sent at 1:37 PM on Monday
+ me:  is the sidl parser in bocca fully resolving, e.g. if methods on class x pass objects of type y, do we know the full sidl name of type y when it's given as a partial name?
+ brnorris03:  no, not yet
+resolve is partly done
+so it's not used
+ me:  ok. will work based on arguments given, then. thanks.
+ brnorris03:  you mean args given to bocca?
+bocca itself fully resolves the arguments, but of course that doesn't cover imports
+ Sent at 1:41 PM on Monday
+ me:  well, that's the only other source of info, so yeah. in what way are imports not covered?
+ Sent at 1:42 PM on Monday
+ brnorris03:  in the case i though you were referring to -- e.g., some argument is using incomplete type, e.g., MyException, which happens to be defined in an imported package
+is that legal anyway?
+ Sent at 1:44 PM on Monday
+ me:  well, for some version of legal, should be ... but ok, let's not go there now.
+ Sent at 1:46 PM on Monday
+ me:  I'm probably going to have some dumb questions on datastructures and serialization again in a bit, but still trying to sort through construction of a useful and intelligent detail question there.  A higher level Q: In builder.py (gmake)  would you see it as a good or bad thing to factor  createMakeDependsSTring into various getDependsXYZ and formatDepends() operations?
+ Sent at 1:50 PM on Monday
+ brnorris03:  don't know -- it's obviously been growing. if it would make it easier to read, then go ahead, but i would give it the list of dependencies and not do multiple graph traversals for each new getDependsXYZ method
+ Sent at 1:52 PM on Monday
+ me:  I think the answer's no, but do we ever analyze external sidl files for symbols? or do we just assume they are needed and attach them as args any time there's a babel that might need them?
+ Sent at 2:08 PM on Monday
+ brnorris03:  we don't analyze the parsed sidl at all, so potentially you can have multiple nodes created for the same symbol
+ Sent at 2:10 PM on Monday
+ me:  if we don't analyze the parsed sidl at all, what nodes are being created, let alone redundantly?
+ Sent at 2:12 PM on Monday
+ brnorris03:  well, all the nodes bocca recognizes, so everything down and including class level
+which leaves methods and everything in them
+the smallest granularity recognized by bocca is interface/port/class/component
+ me:  so we analyze --external sidl excluding stuff inside interface/class {}.
+ brnorris03:  we don't analyze, just collect
+ me:  (with some demented special processing on enum imports...)
+ brnorris03:  nope, enums are very much the same as everything else
+ Sent at 2:14 PM on Monday
+ me:  ah, if only(enums). but never mind. What i'm trying to get my head around is if i should somehow introduce new node types for fully external sidl entities (meaning those about which via xml I know all the libs, all the includes, all the sidl files such that we never need regenerate them). extclass, extinterface, extenum, extpackage, etc since they aren't 'in project'
+ Sent at 2:18 PM on Monday
+ me:  the first example, of course, is handling gov.cca, making it a non-special case (except in project ./configure).
+ Sent at 2:20 PM on Monday
+ brnorris03:  re enums -- i meant from bocca's point of view
+bocca nodes have a "property"
+that you can use to designate them as external
+ Sent at 2:25 PM on Monday
+ brnorris03:  let me dredge up an example
+since i just did one for cqos
+ Sent at 2:27 PM on Monday
+ brnorris03:  well, it doesn't have exactly what we need, but i think having a field to indicate external vertices would be nicer than creating a bunch of new classes
+ me:  i had the impression all that gets us is an external sidl file reference which can go stale and a local copy for client generation. Is it a good idea to extend that further? or to have  an external depl.xml reference alternative?
+ brnorris03:  i think that we should add them as real vertices, just using the current classes, e.g., interface, port, etc.
+then add more info to the base class to store things that apply only for external
+that would just be a dictionary, most likely
+which would have to be updated every time the project is moved, of course
+actually that would make revsion control a pain
+e.g, unless i'm misunderstanding, you are saying that local info will end up in the project graph...
+ Sent at 2:34 PM on Monday
+ me:  well, one approach would be to clone the xml depl file into a project graph string. if the file isn't found on a new system, then we know everything defined in that string is invalid and for bocca purposes the project is probably frozen until the user puts in a new path to the equivalent file. A minor extension on all that would be to store multiple tuples {user, host, xml string} and thus it's a pain once per build environment, typically.
+during active development, a project file would accumulate a lot of 'intelligence' about other peoples disks...
+ Sent at 2:44 PM on Monday
+ brnorris03:  i need to go get kiddos from school -- i'll think about this more on the way...
+ Sent at 2:45 PM on Monday
+ brnorris03's new status message - Away   2:47 PM
+ me:  an environment node type, maybe...
+ Sent at 2:51 PM on Monday
+ brnorris03:  yes, i like the environment object idea
+ Sent at 4:17 PM on Monday
+ me:  question is how little can we get away with putting in it? i'd like somehow to be able to link back/forth to the given depl file when visiting an external symbol so that the first time i see an external depl referenced in a symbol, i check it and can mark all nodes claiming to be from that depl as updated instead of redoing the path repair calculation/dialog all the time.
+ Sent at 4:33 PM on Monday
+ brnorris03:  well, we can put a timestamp + checksum check on the xml file every time the depl. info is requested for an external symbol
+ Sent at 4:39 PM on Monday
+ me:  i'm mostly concerned with the 'through repository' issue for externals. the 'did it change under us' problem is as you note mostly solvable with a quick check. it's the 'it disappeared, where to now?' that seems to rate a pile of data that probably shouldn't litter the regular nodes.
+ Sent at 4:42 PM on Monday
+ brnorris03:  if all this is stored in a deployment object, which is then referenced from the symbol, that would reduce clutter. then the only thing to do is to create a reliable caching implementation for that object.
+so we could serialize these objects in a separate file (or files), not in the more abstract project representation
+if you think that this would be faster than reading the xml again
+ Sent at 4:45 PM on Monday
+ me:  haven't timed xml versus some hash parse for our relatively simple xml. I tend to think of external deployment xml files as configure arguments (assuming we had the machinery in autoconf); if they aren't there, you're dead. We can make a list of user/host/deplfile/external symbol and keep that in a file on the side; have configure take arguments, then check the list, then bomb if some external-build sidl symbol is still unresolved. Do we want to keep a graph distinction between externally built and the stuff we're regenerating in external/ from cached si?dl
+ Sent at 4:51 PM on Monday
+ brnorris03:  you would have to have some sort of distinction if we keep the current rule that disallows full paths in the graph;
+also, how you handle this in configure is somewhat independent of how it's represented in bocca
+since configure + make is just one build plugin -- a scons one would need all this info, too
+ Sent at 4:54 PM on Monday
+ me:  suspected so. I expect it may be as simple as CSV data or hashed tuples (properties file) on disk; probably not much more complicated in  bocca. the depl files have a standalone query program, so any build system can requery the depl if they don't want to visit the bocca internals. Wasn't expecting to save anything gmake specific anywhere.
+ Sent at 4:57 PM on Monday
+ me:  ok. don't want to drag you into coding. Your minutes spent on architecture should cut down the false starts a good bit. I'm assuming any method not implemented in the gmake builder plugin is fair game for redefining.
+ brnorris03:  the interface is a bit misleading
+when we came up with it, there was a notion of having bocca initiate build processes
+this has not happened
+ me:  which? so many to pick from?
+thank heaven.

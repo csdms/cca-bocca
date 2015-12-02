@@ -1,0 +1,21 @@
+
+preambling crap
+
+ // DO-NOT-DELETE splicer.begin(x.w)
+	spl line 6
+	spl line 7
+ // DO-NOT-DELETE splicer.end(x.w)
+
+ // DO-NOT-DELETE splicer.begin(x.y)
+	spl line 3
+	spl line 4
+ // DO-NOT-DELETE splicer.end(x.y)
+
+ // DO-NOT-DELETE splicer.begin(x.z)
+	exception in source
+	spl line 1
+ // DO-NOT-DELETE splicer.end(x.z)
+
+ // DO-NOT-DELETE splicer.begin(y.s)
+ // DO-NOT-DELETE splicer.end(y.s)
+post ambling crap

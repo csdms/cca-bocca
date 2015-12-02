@@ -1,0 +1,144 @@
+#!/usr/bin/env python
+""" demo-merge, a tester of the modularized merge.
+   Author: Benjamin Allan
+   Org:	Sandia National Laboratories, Livermore
+   Date: 5/2006.
+   License: GPLv2. Of course this doesn't affect the files that
+	are processed by this utility.
+"""
+import sys
+import os.path
+import distutils.sysconfig
+import shutil
+
+# FIX BOCCA PATH. We end up doing this in every python script. maintenance hassle.
+#
+bocca_self = os.path.realpath(sys.argv[0])
+bocca_tools_bin = os.path.dirname(bocca_self)
+libdirname = distutils.sysconfig.get_config_var('LIB')
+if libdirname is None: libdirname = 'lib' # for python versions < 2.5
+
+try:
+    boccalibPath = os.path.abspath(os.path.join(bocca_tools_bin, '..', libdirname,
+                                    'python' + distutils.sysconfig.get_python_version(),
+                                    'site-packages', 'boccalib'))
+    subcmdModulePath = os.path.join(boccalibPath, 'cct')
+    sys.path.append(boccalibPath)
+    sys.path.append(subcmdModulePath)
+except:
+    print 'bocca: Cannot locate bocca module path.'
+    exit(1)
+
+# print >> sys.stderr, "python path is:"
+# print >> sys.stderr, sys.path
+
+print "At present this script can only be run correctly if the user is in trunk/scripts of the bocca source tree, where it finds its input files."
+
+
+from splicers.Operations import *
+
+class Usage(Exception):
+    def __init__(self, msg):
+        self.msg = msg
+
+def main(argv=None):
+
+    print " test drive merge nested "
+    targetName = os.path.join(os.getcwd() , "splice-target-0.inp")
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-0.inp")
+    sourceKey = "DO-NOT-DELETE bocca.splicer"
+    mergeFiles(targetout, srcName, targetKey, sourceKey)
+    # alt calls: mergeFromString{file, string,...}, mergeSources{Source, Source,...}
+
+    print " test drive rename "
+    targetName = os.path.join(os.getcwd() , "splice-target-1.inp")
+    targetType="myclass2"
+    sourceType="myclass1"
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-1.inp")
+    renameInFiles(targetout, srcName, targetKey, oldtype=sourceType, newtype=targetType )
+
+
+    print " test drive replace from string"
+    targetName = os.path.join(os.getcwd() , "splice-target-2.inp")
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-2.inp.buffer")
+    sourceKey = "DO-NOT-DELETE splicer"
+    buffer="""
+preambling crap
+
+ // DO-NOT-DELETE splicer.begin(x.y)
+        spl line 3
+        spl line 4
+ // DO-NOT-DELETE splicer.end(x.y)
+
+ // DO-NOT-DELETE splicer.begin(x.z)
+        spl line 1
+ // DO-NOT-DELETE splicer.end(x.z)
+
+ // DO-NOT-DELETE splicer.begin(y.s)
+ // DO-NOT-DELETE splicer.end(y.s)
+post ambling crap
+"""
+    mergeFromString(targetout, buffer, srcName, targetKey, sourceKey, warn=True)
+
+    print " test drive replace in string from file"
+    targetName = os.path.join(os.getcwd() , "splice-target-3.inp.buffer")
+    targetout =  targetName + ".out"
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-3.inp")
+    sourceKey = "DO-NOT-DELETE splicer"
+    buffer="""
+preambling gen
+
+ // DO-NOT-DELETE splicer.begin(x.y)
+        gen line 1
+        gen line 2
+ // DO-NOT-DELETE splicer.end(x.y)
+
+ // DO-NOT-DELETE splicer.begin(x.z)
+ // DO-NOT-DELETE splicer.end(x.z)
+
+ // DO-NOT-DELETE splicer.begin(x.q)
+ // DO-NOT-DELETE splicer.end(x.q)
+
+post ambling gen
+"""
+    print mergeFileIntoString(targetout, buffer, srcName, targetKey, sourceKey, warn=True)
+
+    print " test drive merge unnested " # merge(append) source into target blocks of same name
+    targetName = os.path.join(os.getcwd() , "splice-target-4.inp")
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-4.inp")
+    sourceKey = "DO-NOT-DELETE splicer"
+    mergeFiles(targetout, srcName, targetKey, sourceKey, insertFirst=False, replaceIdentical=False)
+
+    print " test drive merge w/trival kills " # merge(append) source into target blocks of same name
+    targetName = os.path.join(os.getcwd() , "splice-target-5.inp")
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-5.inp")
+    sourceKey = "DO-NOT-DELETE splicer"
+    mergeFiles(targetout, srcName, targetKey, sourceKey, insertFirst=False, replaceIdentical=False,killSubstrings=["xception"], killBlockKeys=["DO-DELETE foo"])
+
+    print " test drive merge w/cca kills " # merge(append) source into target blocks of same name
+    targetName = os.path.join(os.getcwd() , "splice-target-6.inp")
+    targetout =  targetName + ".out"
+    shutil.copyfile(targetName, targetout)
+    targetKey = "DO-NOT-DELETE splicer"
+    srcName = os.path.join(os.getcwd(), "splice-source-6.inp")
+    sourceKey = "DO-NOT-DELETE splicer"
+    mergeFiles(targetout, srcName, targetKey, sourceKey, insertFirst=False, replaceIdentical=False,killSubstrings=["Insert-Code-Here"])
+
+if __name__ == "__main__":
+    sys.exit(main())

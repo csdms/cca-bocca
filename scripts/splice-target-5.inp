@@ -1,0 +1,25 @@
+
+preambling
+
+ // DO-NOT-DELETE splicer.begin(x.w)
+	org line 1
+	org line 2
+      // DO-DELETE foo.begin()
+crap to die
+      // DO-DELETE foo.end()
+ // DO-NOT-DELETE splicer.end(x.w)
+
+ // DO-NOT-DELETE splicer.begin(x.y)
+	org line 1
+	org line 2
+ // DO-NOT-DELETE splicer.end(x.y)
+
+ // DO-NOT-DELETE splicer.begin(x.z)
+	exception in target 1
+ // DO-NOT-DELETE splicer.end(x.z)
+
+ // DO-NOT-DELETE splicer.begin(x.q)
+	exception in target 2
+ // DO-NOT-DELETE splicer.end(x.q)
+
+post ambling

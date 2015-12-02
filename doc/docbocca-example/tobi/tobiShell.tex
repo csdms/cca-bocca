@@ -1,0 +1,368 @@
+\immediate\write18{rm -f ./defaults.gp}
+\begin{filecontents*}{./defaults.gp}
+set style data lines
+set grid
+set zeroaxis xy
+set terminal postscript eps
+\end{filecontents*}
+%% Just for emphasing: %%
+\def\red{\color{red}}
+{
+  \catcode`\@\active
+  \gdef\makeatactive{\catcode`\@\active}
+%  \gdef\makeatswitchcolor{\makeatactive\let@=\switchcolor}
+}
+\def\switch#1{%
+  \expandafter\ifx\csname switch\string#1\endcsname\relax%
+  \iftrue{\else}\fi%
+    \expandafter\def\csname switch\string#1\endcsname{\relax}%
+    #1%
+  \else%
+  \iffalse{\else}\fi%
+  \fi%
+}
+%% end decoration. %%
+\documentclass{article}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage[DIV15]{typearea}
+\usepackage{color}
+\usepackage{tobiShell}
+\parindent0pt
+\parskip1pt
+\begin{document}
+\title{Documentation for the Package \protect\tt tobiShell.sty}
+\author{Tobias N{\"a}hring}
+\maketitle
+\tableofcontents
+\section{Introduction}
+The package \texttt{tobiShell.sty}\footnote{The prefix \mbox{\tt tobi}
+  has been chosen to make the package name unique. There are just too many
+  files named  \mbox{\tt shell.tex} in the net.} allows to include script
+files for external programs within \LaTeX{} documents. Inlined code is
+written to temporary files and the external program is called with the
+file name of the script as the last command line argument.
+
+The default external program is the \texttt{bash}-shell. You may
+easily change the default program (e.g. to gnuplot) or specify some
+other executable for some given inline script.
+
+The package has been written and tested for \texttt{Linux}. Maybe,
+with some modifications it runs also under other operating systems.
+\section{Installation}
+Copy \texttt{tobiShell.sty} to some place where \LaTeX{} finds it.
+A good location is your personal \texttt{texmf} tree
+(e.g.~\verb=~/texmf/tex/latex/tobiShell.sty=).
+
+For security reasons \TeX{} does not run external programs from input
+files by default. This behavior can be changed by setting the
+variable \verb=shell_escape= in \texttt{/etc/texmf/texmf.cnf} to
+\texttt{t}. You should not do so because of it is a
+{\color{red}security risk}! It enables also mailware possibly hidden
+in some down-loaded \TeX{} document.
+
+It is better to enable the execution of external commands with the
+help of the \TeX{} command line option \texttt{--shell-escape} (see
+section \ref{sec:usage}) only for safe \LaTeX{} input files
+(i.e. input files you have written or at least inspected by yourself).
+
+\section{Usage}
+\label{sec:usage}
+\subsection{Most simple usage -- the \protect\texttt{bash}-shell}
+The most simple application of the package is to embed a \texttt{bash}
+shell script into your \LaTeX{} document. Just write the shell script
+between the command sequences {\color{red}\verb=\bShell=} and
+{\color{red}\verb=\eShell=} in your \LaTeX{}-source.
+When comiling the \LaTeX{}-source pass the command line option
+\texttt{--shell-escape} to \LaTeX{} to enable the execution of external
+commands. (Once more the advice to apply this command line option only
+with trustworthy \LaTeX-sources.)
+
+\LaTeX{} will save the lines between \verb=\bShell= and \verb=\eShell=
+to a file named \texttt{shEsc.tmp} (by default) and send it to the
+shell.
+\paragraph{\texttt{Bash} script example}
+For an example let us write the current directory contents into some
+file \texttt{ls.output} from within a \LaTeX{}-document. The code for
+this end is just:
+{
+\makeatactive
+\def@{\switch\red}
+\begin{verbatim}
+@\bShell@
+ls > ls.output
+@\eShell@
+\end{verbatim}
+}
+You can easily include the output of the command into your
+\LaTeX{}-source via
+\begin{verbatim}
+\input{./ls.output}
+\end{verbatim}
+On my computer this results to:
+\emergencystretch2cm
+\bShell ls > ls.output\eShell
+\IfFileExists{./ls.output}
+{%
+  % Some characters that often occur in file names:
+  \texttt{%
+    \catcode`\_=11%
+    \catcode`\~=11%
+    \input{ls.output}}%
+}{%
+  The file
+  \texttt{ls.output} has not been generated. Maybe you did not pass
+  the command line option \texttt{--shell-escape} to \LaTeX.
+}
+
+If something goes wrong (e.g. you didn't issue the
+\texttt{--shell-escape} command line option) \LaTeX{} will complain
+about the missing input file \texttt{ls.output}. This is fine if you
+take it as an error message. If you prefer \LaTeX{} to run smoothly
+and to embed an error message into the \LaTeX-document you can use the
+native \LaTeX{}-macro \verb=\IfFileExists= as demonstrated in the
+following example.
+\begin{verbatim}
+\IfFileExists{./ls.output}
+ {%%% then branch %%%
+  \catcode`\_=11 % underscores occur often in file names
+  \input{./ls.output}
+}{%%% else branch %%%
+  The file \texttt{ls.output} has not been generated.
+  Maybe you did not pass the command line option
+  \texttt{--shell-escape} to \LaTeX.
+}
+\end{verbatim}
+
+\subsection{Running other commands}
+Other commands than the \texttt{bash} shell can be used. For an example, we
+will apply the Linux command \texttt{sort} to some lines of text. The
+command to be used can be passed to \verb=\bShell= by an optional
+argument in brackets. This argument is then completed by the name of
+the temporary script file (by default \texttt{shEsc.tmp}) containing
+the text between \verb=\bShell[...]= and \verb=\eShell=.  {
+  \makeatactive\def@{\switch\red}
+\begin{verbatim}
+@\bShell[sort -o tmp.tex]@
+the
+quick
+brown
+fox
+jumps
+over
+a
+lazy
+dog
+@\eShell@
+\end{verbatim}
+}
+
+Below the shell script the outcome of the command can be included into
+the \LaTeX-document via:
+\begin{verbatim}
+\input{./tmp.tex}
+\end{verbatim}
+The result is in this example\footnote{The \mbox{\tt \textbackslash obeylines} macro has been
+  used to preserve the newlines.}:
+\bShell[sort -o tmp.tex]
+the
+quick
+brown
+fox
+jumps
+over
+a
+lazy
+dog
+\eShell
+\IfFileExists{tmp.tex}{{\obeylines\input{tmp.tex}}}{File \texttt{tmp.tex} has
+  not been generated. Perhaps, you did not pass the
+  \texttt{--shell-escape} option to \LaTeX.}
+
+Some programs produce \TeX-output that can directly be read in by
+\LaTeX. As an example we use Gnu-Pari to derive the power series of $\raisebox{1pt}{$\sin(x)$}/\raisebox{-1pt}{$x$}$:
+\begin{verbatim}
+\bShell[gp -q -f <]
+system("rm -f pari.tex");
+writetex("pari.tex",precision(sin(x)/x,10));
+quit;
+\eShell
+\begin{equation}
+\input{./pari.tex}
+\end{equation}
+\end{verbatim}
+and get
+\bShell[gp -q -f <]
+system("rm -f pari.tex");
+writetex("pari.tex",precision(sin(x)/x,10));
+quit;
+\eShell
+\begin{equation}
+  \IfFileExists{pari.tex}{\input{pari.tex}}{
+    \parbox{0.9\linewidth}{
+      The file \texttt{pari.tex} has not been generated.
+      Perhaps, the Gnu-Pari executable \texttt{gp}
+      is not installed.}
+  }
+\end{equation}
+Note, the character '\texttt{<}' in the optional argument to \verb=\bShell= in
+this example. The meaning of this character becomes clear if one
+considers the completed command line:
+{
+\makeatactive\def@{\switch\red}
+\begin{verbatim}
+gp -q -f @< shEsc.tmp@
+\end{verbatim}
+}
+It just redirects the content of the file \texttt{shEsc.tmp} to the
+standard input of Gnu-pari.
+
+\subsection{Changing the defaults}
+Assume you want to include a lot of graphical function plots into your
+document and you always use \texttt{gnuplot} for producing such plots.
+
+Then it makes sense to change the default command from
+\texttt{bash} to \texttt{gnuplot} with the help of
+{
+\catcode`\@=0
+\def@r{\switch\red}
+\def@e{\switch\em}
+\let@@\relax
+\begin{verbatim}
+\def@r\tobiShellCommand@r{@e@@gnuplot@e}
+\end{verbatim}
+or
+\begin{verbatim}
+\renewcommand\tobiShellCommand{gnuplot}
+\end{verbatim}
+}
+(if you prefer the \LaTeX-style).
+Analogously, you can change the name of the generated shell script
+file from \texttt{shEsc.tmp} to whatever you like by
+{
+\catcode`\@=0
+\def@r{\switch\red}
+\def@e{\switch\em}
+\let@@\relax
+\begin{verbatim}
+\def@r\tobiShellFileName@r{@e@@SomeFileName.SomeFileNameExtension@e}
+\end{verbatim}
+}
+For an example, you can set
+\begin{verbatim}
+\def\tobiShellFileName{gnuplot.tmp}
+\end{verbatim}
+better indicating that this temporary file is used for gnuplot.
+\def\tobiShellCommand{gnuplot} \def\tobiShellFileName{gnuplot.tmp}
+After those definitions you can use embedded \texttt{gnuplot} scripts
+like the following to produce function plots.
+\begin{verbatim}
+\bShell
+set terminal postscript eps
+set output "sinc.eps"
+plot [x=0:2*pi] sin(x)/x
+\eShell
+\end{verbatim}
+Below this script you may include the produced eps picture into some figure
+environment. For the current example the result is shown in
+Figure~\ref{fig:sinc}.
+
+\bShell
+set terminal postscript eps
+set output "sinc.eps"
+plot [x=0:4*pi] sin(x)/x
+\eShell
+\begin{figure}
+  \centering
+  \IfFileExists{sinc.eps}{
+    \includegraphics[height=5cm]{sinc.eps}
+  }{ File \texttt{sinc.eps} has not been generated. Maybe
+    \texttt{gnuplot} is not installed on your system.  }
+  \caption{The function plot generated by \texttt{gnuplot} via an
+    embedded script.}
+  \label{fig:sinc}
+\end{figure}
+
+Sometimes you want to use the same fundamental \texttt{gnuplot}
+settings for a number of plots. Those settings can easily be
+included into the \LaTeX-file with the help of the \LaTeX-environment
+\verb=\begin{filecontents*}...\end{filecontents*}=
+which must be used before the
+\verb=\documentclass= statement. In the following example the default
+settings are written into a file named \texttt{./defaults.gp}
+\begin{verbatim}
+\begin{filecontents*}{./defaults.gp}
+set style data lines
+set grid
+set zeroaxis xy
+set terminal postscript eps
+\end{filecontents*}
+\end{verbatim}
+The file \texttt{defaults.gp} is then included into the gnuplot
+scripts via the gnuplot command \texttt{load} as shown in the
+following example:
+\begin{verbatim}
+\bShell
+load "defaults.gp"
+set output "errfct.eps"
+plot [x=-5:5] 1/(1+exp(x))
+\eShell
+\end{verbatim}
+\bShell
+load "defaults.gp"
+set output "errfct.eps"
+plot [x=-5:5] 1/(1+exp(x))
+\eShell
+\begin{figure}
+  \centering
+  \includegraphics[height=5cm]{errfct.eps}
+  \caption{Function plot generated by \texttt{gnuplot} with default
+    settings.}
+  \label{fig:errfct}
+\end{figure}
+The resulting plot is represented in Figure~\ref{fig:errfct}.
+\clearpage
+
+In the last example with the following inline script the
+\texttt{pslatex} driver of \texttt{gnuplot} is used which allows
+labeling of curves with \LaTeX{} text (see Figure~\ref{fig:mex}).
+
+\begin{verbatim}
+\bShell[gnuplot]
+set term pslatex norotate
+set output "mex.pstex"
+f(x)=exp(-1/(1-x*x))
+set lmargin 0
+set xlabel "$x$"
+set ylabel "$y$"
+set key bottom spacing 2
+plot [x=-1:1] f(x)/f(0) title \
+"$e\\cdot\\exp\\left(\\frac{-1}{1-x^{2}}\\right)$", \
+sin(pi*x) title "$\\sin(\\pi x)$
+\eShell%
+\end{verbatim}
+\bShell[gnuplot]
+set term pslatex norotate
+set output "mex.pstex"
+f(x)=exp(-1/(1-x*x))
+set lmargin 0
+set xlabel "$x$"
+set ylabel "$y$"
+set key bottom spacing 2
+plot [x=-1:1] f(x)/f(0) title \
+"$e\\cdot\\exp\\left(\\frac{-1}{1-x^{2}}\\right)$", \
+sin(pi*x) title "$\\sin(\\pi x)$
+\eShell%
+\begin{figure}
+  \center
+  \fbox{\input{mex.pstex}}
+  \caption{Using the \texttt{pslatex} driver of \texttt{gnuplot}}
+  \label{fig:mex}
+\end{figure}
+
+\end{document}
+%%% Local Variables: 
+%%% mode: latex
+%%% LaTeX-command-style: (("." "latex --shell-escape"))
+%%% TeX-master: t
+%%% End: 

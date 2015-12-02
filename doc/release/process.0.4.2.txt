@@ -1,0 +1,29 @@
+This is a record of the 0.4.2 release process (ba,bn).
+
+Set the version number on the trunk to 0.4.2.
+svnversion shows 1200. Notably, in 1200AD, the university of paris was founded.
+Set the release name to Paris. 
+Regenerate configure and commit.
+Do clean checkout of bocca/ to scratch area.
+
+Start a new stable branch from the trunk:
+svn copy trunk branches/0.4.x
+
+Add files to 0.4.x (these will need to migrate to trunk as appropriate eventually):
+ CHANGES INSTALL BUGS
+
+svn commit branches/0.4.x
+
+Tag the release branch:
+svn copy 0.4.x ../tags/release-0.4.2
+svn commit
+
+Move trunk to next unstable version, 0.5.0 by updating configure.in, configure.
+
+All patches to 0.4.2 should be made to branches/0.4.x.
+Treate tags/release-0.4.2 as read-only, for diffs off the original
+release.
+
+Whenever releasing a patched 0.4.x, update the svnversion and
+increment the patch number (.x) in scripts/bocca, configure.ac
+and configure. The 'release' tag (paris) stays the same.

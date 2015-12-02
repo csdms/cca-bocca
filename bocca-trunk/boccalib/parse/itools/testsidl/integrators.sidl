@@ -1,0 +1,44 @@
+package integrators version 1.0 {
+
+  class MonteCarlo implements integrator.IntegratorPort, 
+                              gov.cca.Component,
+			      gov.cca.ComponentRelease
+  {
+	// integrator.IntegratorPort methods:
+	double integrate(in double lowBound, in double upBound, in int count);
+
+	// gov.cca.Component methods:
+	void setServices(in gov.cca.Services services) throws gov.cca.CCAException;
+
+	// gov.cca.ComponentRelease methods:
+	void releaseServices(in gov.cca.Services services) throws gov.cca.CCAException;
+  }
+
+  // The following components implement all methods of the 
+  // integrator.IntegratorPort and gov.cca.Component interfaces.
+  // Since they use the SIDL 'implements-all' keyword, the 
+  // methods do not need to be listed explicitly.
+
+  class Midpoint implements-all integrator.IntegratorPort, 
+                                gov.cca.Component,
+			        gov.cca.ComponentRelease
+  {
+  }
+
+  class ParallelMid implements-all integrator.IntegratorPort,
+				   gov.cca.Component,
+				   gov.cca.ComponentRelease
+  {
+  }
+
+  class Trapezoid implements-all integrator.IntegratorPort,
+                  gov.cca.Component,
+                  gov.cca.ComponentRelease
+  {
+  }
+  class Simpson implements-all integrator.IntegratorPort,
+                  gov.cca.Component,
+                  gov.cca.ComponentRelease
+  {
+  }
+}
