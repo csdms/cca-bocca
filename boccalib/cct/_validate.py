@@ -8,7 +8,7 @@ import re, os
 def language(n):
     """returns (int status, string canonicalLanguageName)
 """
-    validlangs = ['c', 'cxx', 'f77', 'f77_31', 'f90', 'java', 'python']
+    validlangs = ['c', 'cxx', 'f77', 'f77_31', 'f90', 'f03', 'java', 'python']
     if n in validlangs:
         return (0,n)
     if n in ['C', 'cc']:
@@ -25,13 +25,15 @@ def language(n):
         return (0,'f77_31')
     if n in ['fortran90', 'F90', 'FORTRAN']:
         return (0,'f90')
+    if n in ('F03', ):
+        return (0,'f03')
     err(str(n) + " is an unknown Bocca language. Valid languages are " + ', '.join(validlangs) + '.' )
 
 def validateDialect(lang, dial):
     status, l = language(lang)
     if status != 0:
         return (1, 'unknown')
-    if l in ['c', 'java', 'f77', 'f90', 'f77_31', 'python']:
+    if l in ['c', 'java', 'f77', 'f90', 'f03', 'f77_31', 'python']:
         if dial in ['standard']:
             return (0, 'standard')
     if l == 'cxx':

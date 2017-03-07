@@ -69,6 +69,30 @@ void boccaThrowException(in string message);
 
 """
 
+componentsidl['f03']="""
+/*
+ * Function to display a message if an exception occurs.
+ * @param excpt the exception to be checked.
+ * @param msg the message to be printed or added to the exception if fatal is true.
+ * @param fatal if an exception occured and fatal is false, msg is printed.
+ *              If fatal is true, msg is printed and exit called.
+ */
+void checkException(inout sidl.BaseInterface excpt, in string msg, in bool fatal);
+
+
+
+/* Function callable in f03 only to clear the exception.
+ * Use the macro form, not this directly. 
+ */
+void boccaClearException();
+
+/* Function callable in f03 only to create the exception.
+ * Use the macro form, not this directly.
+ */
+void boccaThrowException(in string message);
+
+"""
+
 # common stuff here, if any.
 componentsidl['all']="""
 /*

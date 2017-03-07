@@ -390,7 +390,7 @@ source was apparently empty."""
         if not Line.matchedSymbolTail(symbol, opts.matchSyms):
             # here we assume the real symbol block comes last. works for uses in f90
             return 0
-        if opts.language in ['cxx','python','f77','f90','java']:
+        if opts.language in ['cxx','python','f77','f90','f03','java']:
             if (opts.linesAfter < 1):
                 return 1
         if opts.language in ['c']:

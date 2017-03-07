@@ -2,10 +2,10 @@ from writers.sourceWriter import SourceWriter
 
 #---------------------------------------------------------------------------------
 def getWriterParameters():
-     return (F90Writer.language, F90Writer.babelVersions, F90Writer.dialect)
+     return (F03Writer.language, F03Writer.babelVersions, F03Writer.dialect)
  
-class F90Writer(SourceWriter):
-    language = 'f90'
+class F03Writer(SourceWriter):
+    language = 'f03'
     dialect = 'standard'
     commentLineStart = "C    "
     babelVersions = ['1.0.X', '1.1.X', '1.2.X', '1.4.X', '1.5.X', '2.0.X']

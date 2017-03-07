@@ -254,7 +254,7 @@ Any lines that are deleted from implFile get put in implFile.rej.
 
     parser.add_option("-c", "--suppress", action="callback", callback=c_callback, type="string", help="funcName : add funcName to the suppressed common warnings list.")
 
-    parser.add_option("-l", "--language", action="callback", callback=l_callback, type="string", help="LANG : Where LANG is c,cxx,f90,f77,f77_31,python,java,sidl. Default cxx.")
+    parser.add_option("-l", "--language", action="callback", callback=l_callback, type="string", help="LANG : Where LANG is c,cxx,f90,f03,f77,f77_31,python,java,sidl. Default cxx.")
 
     parser.add_option("-k", "--kill-key", action="callback", callback=kill_callback, type = "string", help="killKey : Lines matching killKey(s) will be removed if a splice matching the symbol is available.")
 
@@ -302,7 +302,7 @@ Any lines that are deleted from implFile get put in implFile.rej.
 #------------------------------------------------
 def validateOpts(opts):
     language = opts.language
-    if not language in [ "C", "c" , "ucxx", "ocxx" , "cxx", "c++" , "uc++" , "CC", "f90", "f77", "f77_31" , "java" , "python", "sidl"]:
+    if not language in [ "C", "c" , "ucxx", "ocxx" , "cxx", "c++" , "uc++" , "CC", "f90", "f03", "f77", "f77_31" , "java" , "python", "sidl"]:
         print "Unknown output language: ", language
         return False
     if not opts.blocks  and  len(opts.spliceFiles) < 1:

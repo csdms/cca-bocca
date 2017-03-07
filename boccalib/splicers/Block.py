@@ -372,7 +372,8 @@ The block being checked is the block before the block with the symbol code body.
                     p -= 1
                     line = lines[p]
 
-        if language == "f90":
+        # if language == "f90":
+        if language in ('f90', 'f03'):
             while p > 0 and \
                 line[0:21] != "recursive subroutine " and \
                 line[0:5] != "!!!!" and \

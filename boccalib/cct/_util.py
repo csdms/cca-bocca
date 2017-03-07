@@ -713,6 +713,8 @@ def lang_to_fileext(lang):
         return "c"
     elif lang == "f90":
         return "F90"
+    elif lang == "f03":
+        return "F03"
     elif lang == "f77":
         return "f"
     elif lang == "f77_31":

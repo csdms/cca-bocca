@@ -1,5 +1,6 @@
 __all__ = ['writerModules',
            'f90Writer', 
+           'f03Writer', 
            'cxxWriter', 
            'cxx_cioWriter',
            'f77Writer', 
@@ -12,6 +13,7 @@ __all__ = ['writerModules',
 
 writerModules = [
 'f90Writer', 
+'f03Writer', 
 'cxxWriter', 
 'f77Writer', 
 'f77_31Writer', 

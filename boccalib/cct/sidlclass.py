@@ -41,7 +41,7 @@ class Sidlclass(BVertex):
         self.new_extends = {}        # Used in create and change
         self.new_implements = {}     # Used in create and change
         self.displayAll = False      # Used in display
-        self.displaylangs = ['c', 'cxx', 'f77', 'f77_31', 'f90', 'java', 'python']
+        self.displaylangs = ['c', 'cxx', 'f77', 'f77_31', 'f90', 'f03', 'java', 'python']
         self.graph = None
         if (symbol == 'temp'): 
             BVertex.__init__(self, action = action, 
@@ -954,6 +954,8 @@ class Sidlclass(BVertex):
         hext = lang_to_headerext(self._b_language)
         if (self._b_language.upper() == 'F90'):
             newImplHeaderFile = symbol.replace('.','_') + '_Mod.F90'
+        elif (self._b_language.upper() == 'F03'):
+            newImplHeaderFile = symbol.replace('.','_') + '_Mod.F03'
         else: 
             newImplHeaderFile = symbol.replace('.','_') + '_Impl.' + hext
             

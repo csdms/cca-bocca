@@ -34,6 +34,7 @@ killByLang = dict()
 killByLang['f77'] = f77KillKeys
 killByLang['f77_31'] = killByLang['f77']
 killByLang['f90'] = f90KillKeys
+killByLang['f03'] = killByLang['f90']
 killByLang['python'] = pythonKillKeys
 killByLang['c'] = cKillKeys
 killByLang['cxx'] = cxxKillKeys

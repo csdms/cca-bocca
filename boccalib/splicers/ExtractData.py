@@ -234,7 +234,7 @@ in a filename derived from the symbol names and language.
 
     parser.add_option("-O", "--one-file", action="store_true", dest="singleFile", help="Put all extracted splices in outDir/inputFile.splices.")
     parser.add_option("-f", "--output-file", type="string", dest="outputFile", help="FILE : Override the output filename assumption.")
-    parser.add_option("-l", "--language", action="callback", callback=l_callback, type="string", help="LANG : Where LANG is c,cxx,f90,f77,f77_31,python,java,sidl. Default cxx.")
+    parser.add_option("-l", "--language", action="callback", callback=l_callback, type="string", help="LANG : Where LANG is c,cxx,f90,f03,f77,f77_31,python,java,sidl. Default cxx.")
 
     parser.add_option("-B", "--target-key", type="string", dest="sourceKey", help="sourceSpliceKey : The start word ([a-zA-Z0-9.] are permitted characters) of the block delimiters in the input to be extracted. The default sourceSpliceKey matches that of babel 1.0 splicer blocks.")
     parser.add_option("-F", "--from", type="string", dest="sourceKey", help="alias for -A.")
@@ -265,7 +265,7 @@ in a filename derived from the symbol names and language.
 #------------------------------------------------
 def validateOpts(opts):
     language = opts.language
-    if not language in [ "C", "c" , "ucxx", "ocxx" , "cxx", "c++" , "uc++" , "CC", "f90", "f77" , "f77_31" ,  "java" , "python", "sidl", "sh", "csh", "tcsh", "bash", "xml"]:
+    if not language in [ "C", "c" , "ucxx", "ocxx" , "cxx", "c++" , "uc++" , "CC", "f90", "f03", "f77" , "f77_31" ,  "java" , "python", "sidl", "sh", "csh", "tcsh", "bash", "xml"]:
         print "Unknown output language: ", language
         return False
     if not opts.blocks  and  len(opts.spliceFiles) < 1:
