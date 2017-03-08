@@ -6,7 +6,7 @@ def getWriterParameters():
 class CWriter(SourceWriter):
     language = 'c'
     dialect = 'standard'
-    babelVersions = ['1.1.X','1.2.X','1.4.X', '1.5.X']
+    babelVersions = ['1.1.X','1.2.X','1.4.X', '1.5.X', '2.0.X']
     commentLineStart = "/* "
     commentLineEnd = "*/"
 

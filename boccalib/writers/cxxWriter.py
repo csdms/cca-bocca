@@ -7,7 +7,7 @@ class CxxWriter(SourceWriter):
     language = 'cxx'
     dialect = 'standard'
     commentLineStart = "// "
-    babelVersions = ['1.0.X', '1.1.X', '1.2.X', '1.4.X', '1.5.X']
+    babelVersions = ['1.0.X', '1.1.X', '1.2.X', '1.4.X', '1.5.X', '2.0.X']
     usecio=False
 
     def __init__(self, kind = 'component'):
